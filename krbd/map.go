@@ -17,6 +17,14 @@ type Image struct {
 	Snapshot  string
 }
 
+func (i Image) String() string {
+	if i.Snapshot == "" {
+		i.Snapshot = "-"
+	}
+	// "${mons} name=${user},secret=${key} ${pool} ${image} ${snap}"
+	return fmt.Sprintf("%s %s %s %s %s", strings.Join(i.Monitors, ","), i.Options, i.Pool, i.Image, i.Snapshot)
+}
+
 // Options to be passed when mapping a RBD image.
 // krbd tag is the string of the option passed via sysfs.
 type Options struct {
@@ -33,16 +41,15 @@ type Options struct {
 }
 
 func (o Options) String() string {
+	output := []string{}
+
 	t := reflect.TypeOf(o)
 	v := reflect.ValueOf(o)
 
-	output := []string{}
-
 	// Iterate over all available struct fields
 	for i := 0; i < t.NumField(); i++ {
-
 		// Skip values that are zero values of the struct. Otherwise Options would have
-		// to track the upstream default values and always provide all options.
+		// to track the upstream default values to always provide all options.
 		if v.Field(i).Interface() == reflect.Zero(v.Field(i).Type()).Interface() {
 			continue
 		}

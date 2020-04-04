@@ -1,6 +1,53 @@
 package krbd
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
+
+func TestImage_String(t *testing.T) {
+	type fields struct {
+		DevID     int
+		Monitors  []string
+		Pool      string
+		Namespace string
+		Image     string
+		Options   *Options
+		Snapshot  string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "Three Monitors, Typical Options",
+			fields: fields{
+				Monitors: []string{"10.0.0.1", "10.0.0.2", "10.0.0.3"},
+				Pool:     "rbd",
+				Image:    "test-image",
+				Options:  &Options{Name: "admin", Secret: "AQCvCbtToC6MDhAATtuT70Sl+DymPCfDSsyV4w=="},
+			},
+			want: "10.0.0.1,10.0.0.2,10.0.0.3 name=admin,secret=AQCvCbtToC6MDhAATtuT70Sl+DymPCfDSsyV4w== rbd test-image -",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			i := Image{
+				DevID:     tt.fields.DevID,
+				Monitors:  tt.fields.Monitors,
+				Pool:      tt.fields.Pool,
+				Namespace: tt.fields.Namespace,
+				Image:     tt.fields.Image,
+				Options:   tt.fields.Options,
+				Snapshot:  tt.fields.Snapshot,
+			}
+			if got := fmt.Sprintf("%s", i); got != tt.want {
+				t.Errorf("Image.String() via  fmt.Sprintf(\"%%s\", i) = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
 
 func TestOptions_String(t *testing.T) {
 	type fields struct {
@@ -50,8 +97,8 @@ func TestOptions_String(t *testing.T) {
 				Namespace:   tt.fields.Namespace,
 				Secret:      tt.fields.Secret,
 			}
-			if got := o.String(); got != tt.want {
-				t.Errorf("Options.String() = %v, want %v", got, tt.want)
+			if got := fmt.Sprintf("%s", o); got != tt.want {
+				t.Errorf("Options.String() via fmt.Sprintf(\"%%s\", o) = %v, want %v", got, tt.want)
 			}
 		})
 	}
