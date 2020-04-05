@@ -11,9 +11,8 @@ import (
 var (
 	devid   = flag.Int("devid", 0, "RBD Device Index (default 0")
 	force   = flag.Bool("force", false, "Optional force argument will wait for running requests and then unmap the image")
-	dryRun  = flag.Bool("dry-run", false, "dry run (don't actually unmap image)")
-	verbose = flag.Bool("verbose", false, "Enable additional output")
-	help    = flag.Bool("help", false, "Display usage")
+	dryRun  = flag.BoolP("dry-run", "n", false, "dry run (don't actually map image)")
+	verbose = flag.BoolP("verbose", "v", false, "Enable additional output")
 )
 
 func main() {

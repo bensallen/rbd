@@ -21,7 +21,6 @@ var (
 	readOnly  = flag.Bool("read-only", false, "Map the image read-only")
 	dryRun    = flag.BoolP("dry-run", "n", false, "dry run (don't actually map image)")
 	verbose   = flag.BoolP("verbose", "v", false, "Enable additional output")
-	help      = flag.BoolP("help", "h", false, "Display usage")
 )
 
 func main() {
@@ -48,9 +47,10 @@ func main() {
 		Image:    *image,
 		Snapshot: *snap,
 		Options: &krbd.Options{
-			ReadOnly: *readOnly,
-			Name:     *id,
-			Secret:   *secret,
+			ReadOnly:  *readOnly,
+			Name:      *id,
+			Secret:    *secret,
+			Namespace: *namespace,
 		},
 	}
 

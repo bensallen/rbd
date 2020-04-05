@@ -60,7 +60,7 @@ func (o Options) String() string {
 		tag := t.Field(i).Tag.Get("krbd")
 		// Bool types don't include their value just the tag.
 		if v.Field(i).Kind() == reflect.Bool {
-			output = append(output, fmt.Sprintf("%s", tag))
+			output = append(output, tag)
 		} else {
 			output = append(output, fmt.Sprintf("%s=%v", tag, v.Field(i)))
 		}
