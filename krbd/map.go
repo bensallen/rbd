@@ -1,20 +1,22 @@
 package krbd
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
 // Image is a Ceph RBD image.
 type Image struct {
-	DevID     int
-	Monitors  []string
-	Pool      string
-	Namespace string
-	Image     string
-	Options   *Options
-	Snapshot  string
+	DevID    int // Unmap only
+	Monitors []string
+	Pool     string
+	Image    string
+	Options  *Options
+	Snapshot string
 }
 
 func (i Image) String() string {
@@ -25,19 +27,73 @@ func (i Image) String() string {
 	return fmt.Sprintf("%s %s %s %s %s", strings.Join(i.Monitors, ","), i.Options, i.Pool, i.Image, i.Snapshot)
 }
 
-// Options to be passed when mapping a RBD image.
+// Map the RBD image via the krbd interface. An open io.Writer is required
+// typically to /sys/bus/rbd/add or /sys/bus/rbd/add_single_major
+func (i *Image) Map(w io.Writer) error {
+	if len(i.Monitors) == 0 {
+		return errors.New("No monitors defined")
+	}
+	if i.Pool == "" {
+		return errors.New("No pool defined")
+	}
+	if i.Image == "" {
+		return errors.New("No image defined")
+	}
+
+	_, err := w.Write([]byte(i.String()))
+	return err
+}
+
+// Unmap a RBD device via the krbd interface. DevID must be defined.
+// An open io.Writer is required typically to /sys/bus/rbd/remove
+// or /sys/bus/rbd/remove_single_major.
+func (i *Image) Unmap(w io.Writer) error {
+	if i.DevID == 0 {
+		return errors.New("DevID not defined")
+	}
+
+	cmd := strconv.Itoa(i.DevID)
+	if i.Options != nil && i.Options.Force {
+		cmd = cmd + " force"
+	}
+	_, err := w.Write([]byte(cmd))
+	return err
+}
+
+// Options is per client instance and per mapping (block device) rbd device map options.
 // krbd tag is the string of the option passed via sysfs.
 type Options struct {
-	Exclusive   bool   `krbd:"exclusive"`
-	LockOnRead  bool   `krbd:"lock_on_read"`
-	NoTrim      bool   `krbd:"notrim"`
-	ReadOnly    bool   `krbd:"read_only"`
-	AllocSize   int    `krbd:"alloc_size"`
+	// Client Options
+	Fsid                     string `krbd:"fsid"`
+	IP                       string `krbd:"ip"`
+	Share                    bool   `krbd:"share"`
+	Noshare                  bool   `krbd:"noshare"`
+	CRC                      bool   `krbd:"crc"`
+	NoCRC                    bool   `krbd:"nocrc"`
+	CephxRequireSignatures   bool   `krbd:"cephx_require_signatures"`
+	NoCephxRequireSignatures bool   `krbd:"nocephx_require_signatures"`
+	TCPNoDelay               bool   `krbd:"tcp_nodelay"`
+	NoTCPNoDelay             bool   `krbd:"notcp_nodelay"`
+	CephxSignMessages        bool   `krbd:"cephx_sign_messages"`
+	NoCephxSignMessages      bool   `krbd:"nocephx_sign_messages"`
+	MountTimeout             int    `krbd:"mount_timeout"`
+	OSDKeepAlive             int    `krbd:"osdkeepalive"`
+	OSDIdleTTL               int    `krbd:"osd_idle_ttl"`
+
+	// RBD Block Options
+	Force       bool   `krbd:"force"` // Unmap only
+	ReadWrite   bool   `krbd:"rw"`
+	ReadOnly    bool   `krbd:"ro"`
 	QueueDepth  int    `krbd:"queue_depth"`
+	LockOnRead  bool   `krbd:"lock_on_read"`
+	Exclusive   bool   `krbd:"exclusive"`
 	LockTimeout uint64 `krbd:"lock_timeout"`
+	NoTrim      bool   `krbd:"notrim"`
+	AbortOnFull bool   `krbd:"abort_on_full"`
+	AllocSize   int    `krbd:"alloc_size"`
 	Name        string `krbd:"name"`
-	Namespace   string `krbd:"_pool_ns"`
 	Secret      string `krbd:"secret"`
+	Namespace   string `krbd:"_pool_ns"`
 }
 
 func (o Options) String() string {
@@ -54,42 +110,11 @@ func (o Options) String() string {
 			continue
 		}
 		tag := t.Field(i).Tag.Get("krbd")
-		output = append(output, fmt.Sprintf("%s=%v", tag, v.Field(i)))
+		if v.Field(i).Kind() == reflect.Bool {
+			output = append(output, fmt.Sprintf("%s", tag))
+		} else {
+			output = append(output, fmt.Sprintf("%s=%v", tag, v.Field(i)))
+		}
 	}
 	return strings.Join(output, ",")
 }
-
-// From https://github.com/ceph/ceph-client/blob/for-linus/drivers/block/rbd.c#L851
-
-//static const struct fs_parameter_spec rbd_parameters[] = {
-//	fsparam_u32	("alloc_size",			Opt_alloc_size),
-//	fsparam_flag	("exclusive",			Opt_exclusive),
-//	fsparam_flag	("lock_on_read",		Opt_lock_on_read),
-//	fsparam_u32	("lock_timeout",		Opt_lock_timeout),
-//	fsparam_flag	("notrim",			Opt_notrim),
-//	fsparam_string	("_pool_ns",			Opt_pool_ns),
-//	fsparam_u32	("queue_depth",			Opt_queue_depth),
-//	fsparam_flag	("read_only",			Opt_read_only),
-//	fsparam_flag	("read_write",			Opt_read_write),
-//	fsparam_flag	("ro",				Opt_read_only),
-//	fsparam_flag	("rw",				Opt_read_write),
-//	{}
-//};
-
-//struct rbd_options {
-//	int	queue_depth;
-//	int	alloc_size;
-//	unsigned long	lock_timeout;
-//	bool	read_only;
-//	bool	lock_on_read;
-//	bool	exclusive;
-//	bool	trim;
-//};
-//
-//#define RBD_QUEUE_DEPTH_DEFAULT	BLKDEV_MAX_RQ
-//#define RBD_ALLOC_SIZE_DEFAULT	(64 * 1024)
-//#define RBD_LOCK_TIMEOUT_DEFAULT 0  /* no timeout */
-//#define RBD_READ_ONLY_DEFAULT	false
-//#define RBD_LOCK_ON_READ_DEFAULT false
-//#define RBD_EXCLUSIVE_DEFAULT	false
-//#define RBD_TRIM_DEFAULT	true
