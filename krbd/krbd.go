@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-// https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-bus-rbd
+// Reference: https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-bus-rbd
 
 const sysBusPath = "/sys/bus/rbd"
 
@@ -17,7 +17,6 @@ func RBDBusAddWriter() (io.Writer, error) {
 
 	if _, err := os.Stat(rbdBusAddSingleMajor); err == nil {
 		return os.OpenFile(rbdBusAddSingleMajor, os.O_WRONLY, 0644)
-
 	} else if _, err := os.Stat(rbdBusAdd); err == nil {
 		return os.OpenFile(rbdBusAdd, os.O_WRONLY, 0644)
 	}

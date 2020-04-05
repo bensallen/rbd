@@ -1,0 +1,12 @@
+# TODOs
+
+## Map
+
+- Add --options flag to rbdmap that allows passing comma separated options to be passed. This needs a unmarshaller to parse the values into krbd.Options{}.
+- Replicate iotest.WriteLogger(w io.Writer) that accepts a WriteCloser and prints strings instead of hex for verbose logging.
+- Convert use of io.Writer to io.WriteCloser and w.Close() before exiting.
+- Add option to read keyring and secrets files for credentials.
+
+## Unmap
+
+- Add option to specify device path / name

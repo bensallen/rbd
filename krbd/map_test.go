@@ -12,8 +12,8 @@ func TestImage_String(t *testing.T) {
 		Monitors []string
 		Pool     string
 		Image    string
-		Options  *Options
 		Snapshot string
+		Options  *Options
 	}
 	tests := []struct {
 		name   string
@@ -49,8 +49,8 @@ func TestImage_String(t *testing.T) {
 				Monitors: tt.fields.Monitors,
 				Pool:     tt.fields.Pool,
 				Image:    tt.fields.Image,
-				Options:  tt.fields.Options,
 				Snapshot: tt.fields.Snapshot,
+				Options:  tt.fields.Options,
 			}
 			if got := fmt.Sprintf("%s", i); got != tt.want {
 				t.Errorf("Image.String() via  fmt.Sprintf(\"%%s\", i) = %v want %v", got, tt.want)
@@ -255,9 +255,10 @@ func TestImage_Unmap(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "No DevID",
+			name:    "No DevID (defaults to 0)",
 			fields:  fields{},
-			wantErr: true,
+			wantW:   "0",
+			wantErr: false,
 		},
 		{
 			name:    "DevID 1",
