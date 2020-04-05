@@ -9,20 +9,14 @@ import (
 )
 
 var (
-	devid   = flag.Int("devid", 0, "RBD Device Index (default 0")
+	devid   = flag.Int("devid", 0, "RBD Device Index (default 0)")
 	force   = flag.Bool("force", false, "Optional force argument will wait for running requests and then unmap the image")
-	dryRun  = flag.BoolP("dry-run", "n", false, "dry run (don't actually map image)")
+	dryRun  = flag.BoolP("dry-run", "n", false, "dry run (don't actually unmap device)")
 	verbose = flag.BoolP("verbose", "v", false, "Enable additional output")
 )
 
 func main() {
 	flag.Parse()
-
-	//if *device == "" {
-	//	fmt.Printf("Error: --device must be specified\n")
-	//	flag.PrintDefaults()
-	//	os.Exit(1)
-	//}
 
 	w, err := krbd.RBDBusRemoveWriter()
 	if err != nil {

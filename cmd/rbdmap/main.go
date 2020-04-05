@@ -11,13 +11,13 @@ import (
 )
 
 var (
-	monAddrs  = flag.StringSliceP("monitor", "m", []string{}, "Connect to one or more monitor addresses. Can be specified multiple times or comma seperated")
+	monAddrs  = flag.StringSliceP("monitor", "m", []string{}, "Connect to one or more monitor addresses (192.168.0.1[:6789]). Multiple address are specified comma separated.")
 	pool      = flag.StringP("pool", "p", "", "Interact with the given pool.")
 	image     = flag.StringP("image", "i", "", "Image to map")
 	namespace = flag.String("namespace", "", "Use a pre-defined image namespace within a pool")
 	snap      = flag.String("snap", "", "Specifies a snapshot name")
-	id        = flag.String("id", "", "Specifies the username (without the client. prefix)")
-	secret    = flag.String("secret", "", "Specifies the secret")
+	id        = flag.String("id", "", "Specifies the username (without the 'client.' prefix)")
+	secret    = flag.String("secret", "", "Specifies the user authentication secret")
 	readOnly  = flag.Bool("read-only", false, "Map the image read-only")
 	dryRun    = flag.BoolP("dry-run", "n", false, "dry run (don't actually map image)")
 	verbose   = flag.BoolP("verbose", "v", false, "Enable additional output")
