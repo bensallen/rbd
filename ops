@@ -1,1 +1,1 @@
-{"version":1,"ops":[{"type":1,"author":{"id":"a05c052c3fa8ba8c41416ffa9df3d44c7bd1e4d1"},"timestamp":1586525347,"title":"Convert use of io.Writer to io.WriteCloser","message":"- Close() the WriteCloser before exiting","files":null}]}
+{"version":1,"ops":[{"type":5,"author":{"id":"a05c052c3fa8ba8c41416ffa9df3d44c7bd1e4d1"},"timestamp":1586525362,"added":["cmd/map","krbd/map"],"removed":null}]}
