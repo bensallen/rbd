@@ -31,13 +31,15 @@ func main() {
 	}
 
 	if *verbose {
-		w = iotest.NewWriteLogger("boot", w)
+		w = iotest.NewWriteLogger("Boot:", w)
 	}
 
 	for name, mount := range mounts {
-		log.Printf("Mapping image %s from cmdline", name)
+		log.Printf("Boot: mapping image %s from cmdline", name)
 
-		if !*dryRun {
+		if *dryRun {
+			log.Printf("%s", mount.Image)
+		} else {
 			err = mount.Image.Map(w)
 			if err != nil {
 				log.Fatalf("%v", err)

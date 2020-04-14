@@ -87,8 +87,8 @@ func TestParse(t *testing.T) {
 	}{
 		{
 			name: "rbd.root=",
-			args: args{cmdline: `rbd.root={"image":{"pool":"rbd", "image":"test-image1"}, "path":"/newroot", "fstype":"ext4"}`},
-			want: map[string]*Mount{"root": {Image: &krbd.Image{Pool: "rbd", Image: "test-image1"}, Path: "/newroot", Fstype: "ext4"}},
+			args: args{cmdline: `rbd={"root": {"image":{"mons": ["192.168.0.1","192.168.0.2","192.168.0.3:6789"], "opts":{"name": "admin", "secret": "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q=="}, "pool":"rbd", "image":"test-image1"}, "path":"/newroot", "fstype":"ext4"}}`},
+			want: map[string]*Mount{"root": {Image: &krbd.Image{Monitors: []string{"192.168.0.1", "192.168.0.2", "192.168.0.3:6789"}, Options: &krbd.Options{Name: "admin", Secret: "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q=="}, Pool: "rbd", Image: "test-image1"}, Path: "/newroot", Fstype: "ext4"}},
 		},
 		{
 			name: "rbd.root= specified twice with different attributes",

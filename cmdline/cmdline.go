@@ -42,15 +42,15 @@ const prefix = "rbd"
 // Parse attempts to find rbd options from input kernel cmdline and return one
 // or more Images. Only JSON formats below is implemented.
 //
-// rbd.<name>... where <name> is an arbitrary string identifer
+// rbd.<name>... where <name> is an arbitrary string identifer for the mount
 // rbd.root.image=test-image1
 // rbd.root.image.pool=rbd
-// rbd.root.image.mon=192.168.0.1,192.168.0.2,192.168.0.3:6789
+// rbd.root.image.mons=192.168.0.1,192.168.0.2,192.168.0.3:6789
 // rbd.root.image.user=admin
 // rbd.root.image.secret=<key>
 //
 // Optional
-// rbd.root.image.snapshot=snap1
+// rbd.root.image.snap=snap1
 // rbd.root.image.opts=rw,share
 // rbd.root.part=1
 // rbd.root.mntopts=defaults
@@ -59,8 +59,8 @@ const prefix = "rbd"
 // rbd.root.path=/newroot
 //
 // JSON
-// rbd={"root": {"image":{"mon": "192.168.0.1,192.168.0.2,192.168.0.3:6789", "pool":"rbd", "image":"test-image1"}, "path":"/newroot", "fstype":"ext4"}}
-// rbd.root={"image":{"mon": "192.168.0.1,192.168.0.2,192.168.0.3:6789", "pool":"rbd", "image":"test-image1"}, "path":"/newroot", "fstype":"ext4"}
+// rbd={"root": {"image":{"mons": ["192.168.0.1","192.168.0.2","192.168.0.3:6789"], "opts":{"name": "admin", "secret": "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q=="}, "pool":"rbd", "image":"test-image1"}, "path":"/newroot", "fstype":"ext4"}}
+// rbd.root={"image":{"mons": ["192.168.0.1","192.168.0.2","192.168.0.3:6789"], "opts":{"name": "admin", "secret": "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q=="}, "pool":"rbd", "image":"test-image1"}, "path":"/newroot", "fstype":"ext4"}
 func Parse(cmdline string) map[string]*Mount {
 	log.Printf("Debug: %s", cmdline)
 
@@ -82,7 +82,7 @@ func Parse(cmdline string) map[string]*Mount {
 					// Image label and no attribute as part of key, eg. rbd.root=
 					// so assume the value is JSON.
 					if err := json.Unmarshal([]byte(part[splitN+1:]), mount); err != nil {
-						log.Printf("Error parsing json: %v", err)
+						//log.Printf("Error parsing json: %v", err)
 						continue
 					}
 				case 2:
@@ -106,7 +106,8 @@ func Parse(cmdline string) map[string]*Mount {
 	return mounts
 }
 
-//split splits on spaces except when a space is within a quoted or bracketed string.
+//Split strings on spaces except when a space is within a quoted, bracketed, or braced string.
+//Supports nesting multiple brackets or braces.
 func split(s string) []string {
 	lastRune := map[rune]int{}
 	f := func(c rune) bool {
@@ -132,6 +133,7 @@ func split(s string) []string {
 	return strings.FieldsFunc(s, f)
 }
 
+// mapGreaterThan ranges across the provided map[rune]int looking for any values greater than
 func mapGreaterThan(runes map[rune]int, g int) bool {
 	for _, i := range runes {
 		if i > g {

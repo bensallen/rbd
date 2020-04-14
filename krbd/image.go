@@ -7,12 +7,12 @@ import (
 
 // Image is a Ceph RBD image.
 type Image struct {
-	DevID    int // Unmap only
-	Monitors []string
+	DevID    int      // Unmap only
+	Monitors []string `json:"mons"`
 	Pool     string
 	Image    string
-	Snapshot string
-	Options  *Options
+	Snapshot string   `json:"snap"`
+	Options  *Options `json:"opts"`
 }
 
 // String mashalls the Image attributes into the string format expected by the krbd add interface, eg:
