@@ -12,23 +12,10 @@ import (
 	"github.com/bensallen/rbdmap/krbd"
 )
 
+// Mount is filesystem mount specification including Ceph RBD Image mapping
+// configuration which was generated via parsed data from the kernel cmdline.
 type Mount struct {
 	Image     *krbd.Image
-	MountOpts string `json:"mntopts"`
-	Part      string
-	Overlay   bool
-	Path      string
-	Fstype    string
-}
-
-// Image is a RBD image, which was generated via parsed data from the kernel cmdline.
-type Image struct {
-	DevID     int
-	Monitors  []string `json:"mon"`
-	Pool      string
-	Image     string
-	Snapshot  string `json:"snap"`
-	Options   string `json:"opts"`
 	MountOpts string `json:"mntopts"`
 	Part      string
 	Overlay   bool
