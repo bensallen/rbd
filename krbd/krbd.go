@@ -20,7 +20,7 @@ func RBDBusAddWriter() (io.Writer, error) {
 	} else if _, err := os.Stat(rbdBusAdd); err == nil {
 		return os.OpenFile(rbdBusAdd, os.O_WRONLY, 0644)
 	}
-	return nil, fmt.Errorf("Both %s and %s do not exist", rbdBusAddSingleMajor, rbdBusAdd)
+	return nil, fmt.Errorf("could not find %s or %s", rbdBusAddSingleMajor, rbdBusAdd)
 }
 
 // RBDBusRemoveWriter returns an io.Writer with the appropriate sysfs rbd/remove opened.
@@ -34,5 +34,5 @@ func RBDBusRemoveWriter() (io.Writer, error) {
 	} else if _, err := os.Stat(rbdBusAdd); err == nil {
 		return os.OpenFile(rbdBusAdd, os.O_WRONLY, 0644)
 	}
-	return nil, fmt.Errorf("Both %s and %s do not exist", rbdBusAddSingleMajor, rbdBusAdd)
+	return nil, fmt.Errorf("could not find %s or %s", rbdBusAddSingleMajor, rbdBusAdd)
 }
