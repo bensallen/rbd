@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 // Reference: https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-bus-rbd
@@ -41,6 +42,9 @@ func RBDBusRemoveWriter() (io.Writer, error) {
 	return nil, fmt.Errorf("could not find %s or %s", rbdBusAddSingleMajor, rbdBusAdd)
 }
 
+// Device is a RBD device discovered via /sys/bus/rbd/device and attributes read
+// from /sys/device/rbd/<id>. Krbd struct tags are the sysfs file names that
+// are used, eg. for Pool - /sys/device/rbd/0/pool
 type Device struct {
 	ID        int
 	Pool      string `krbd:"pool"`
@@ -89,8 +93,8 @@ func devices(path string) ([]Device, error) {
 }
 
 func (d *Device) readDeviceAttrs(path string) error {
-	t := reflect.TypeOf(d)
-	v := reflect.ValueOf(d)
+	t := reflect.TypeOf(*d)
+	v := reflect.ValueOf(d).Elem()
 
 	// Iterate over all available struct fields
 	for i := 0; i < t.NumField(); i++ {
@@ -102,11 +106,12 @@ func (d *Device) readDeviceAttrs(path string) error {
 				return err
 			}
 			value, err := ioutil.ReadAll(r)
-
 			if err != nil {
 				return err
 			}
-			v.Field(i).SetString(string(value))
+			if len(value) != 0 {
+				v.Field(i).SetString(strings.TrimSpace(string(value)))
+			}
 		}
 	}
 	return nil
