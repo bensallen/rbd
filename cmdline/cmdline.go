@@ -2,7 +2,6 @@ package cmdline
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -135,7 +134,7 @@ func Read(path string) ([]byte, error) {
 	r, err := os.OpenFile(path, os.O_RDONLY, 0644)
 	defer r.Close()
 	if err != nil {
-		return nil, fmt.Errorf("Error opening %s: %v", path, err)
+		return nil, err
 	}
 	return ioutil.ReadAll(r)
 }
