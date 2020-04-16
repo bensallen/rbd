@@ -1,10 +1,12 @@
 package root
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
 	"github.com/bensallen/rbdmap/internal/cli/boot"
+	"github.com/bensallen/rbdmap/internal/cli/device"
 	"github.com/bensallen/rbdmap/internal/cli/rbdmap"
 	"github.com/bensallen/rbdmap/internal/cli/unmap"
 	flag "github.com/spf13/pflag"
@@ -21,7 +23,6 @@ var (
 	verbose   = rootFlags.BoolP("verbose", "v", false, "Enable additional output.")
 )
 
-// Usage help text
 const usageHeader = `rbd - Ceph RBD CLI
 
 Usage:
@@ -30,24 +31,29 @@ Usage:
 Subcommands:
   map      Map RBD Image
   unmap    Unmap RBD Image
-  device   RBD device
-  boot     Boot via RBD image
+  boot     Boot via RBD Image
+  device   Manage RBD Devices
 
 Flags:
 `
 
-//Usage of rbd command
-func Usage() {
+//Usage of rbd command printed to stderr
+func usage() {
 	fmt.Fprintf(os.Stderr, usageHeader)
 	fmt.Fprintf(os.Stderr, rootFlags.FlagUsagesWrapped(0)+"\n")
+}
+
+//Usage of rbd with error message
+func usageErr(err error) {
+	usage()
+	fmt.Fprintf(os.Stderr, "Error: %v\n\n", err)
 }
 
 // Run rbd command
 func Run(args []string) error {
 	rootFlags.ParseErrorsWhitelist.UnknownFlags = true
 	if err := rootFlags.Parse(args); err != nil {
-		Usage()
-		fmt.Fprintf(os.Stderr, "Error: %v\n\n", err)
+		usageErr(err)
 		os.Exit(2)
 	}
 
@@ -56,9 +62,10 @@ func Run(args []string) error {
 		os.Exit(0)
 	}
 
+	// Pick the correct usage to call based on subcommand
 	if *help {
 		if rootFlags.NArg() == 0 {
-			Usage()
+			usage()
 		} else {
 			switch rootFlags.Arg(0) {
 			case "map":
@@ -66,7 +73,17 @@ func Run(args []string) error {
 			case "unmap":
 				unmap.Usage()
 			case "device":
+				// device has its own subcommands
+				switch rootFlags.Arg(1) {
+				case "list":
 
+				case "map":
+					rbdmap.Usage()
+				case "unmap":
+					unmap.Usage()
+				default:
+					device.Usage()
+				}
 			case "boot":
 				boot.Usage()
 			}
@@ -75,25 +92,24 @@ func Run(args []string) error {
 	}
 
 	if rootFlags.NArg() < 1 {
-		return fmt.Errorf("Missing subcommand")
+		usageErr(errors.New("missing subcommand"))
+		os.Exit(2)
 	}
 
-	if rootFlags.NArg() > 1 {
-		return fmt.Errorf("Multiple subcommands specified")
-	}
-
+	// Run subcommands
 	switch rootFlags.Arg(0) {
 	case "map":
 		return rbdmap.Run(args, *verbose, *noop)
 	case "unmap":
 		return unmap.Run(args, *verbose, *noop)
 	case "device":
-
+		return device.Run(args, *verbose, *noop)
 	case "boot":
 		return boot.Run(args, *verbose, *noop)
+	case "help":
+		usage()
 	default:
-		Usage()
-		fmt.Fprintf(os.Stderr, "Error: unrecognized subcommand: %s\n", rootFlags.Arg(0))
+		usageErr(fmt.Errorf("unrecognized subcommand: %s", rootFlags.Arg(0)))
 		os.Exit(2)
 	}
 	return nil
