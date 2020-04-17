@@ -7,6 +7,7 @@ import (
 
 	"github.com/bensallen/rbdmap/internal/cli/boot"
 	"github.com/bensallen/rbdmap/internal/cli/device"
+	"github.com/bensallen/rbdmap/internal/cli/device/list"
 	"github.com/bensallen/rbdmap/internal/cli/rbdmap"
 	"github.com/bensallen/rbdmap/internal/cli/unmap"
 	flag "github.com/spf13/pflag"
@@ -76,7 +77,7 @@ func Run(args []string) error {
 				// device has its own subcommands
 				switch rootFlags.Arg(1) {
 				case "list":
-
+					list.Usage()
 				case "map":
 					rbdmap.Usage()
 				case "unmap":

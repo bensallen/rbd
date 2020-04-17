@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/bensallen/rbdmap/internal/cli/device/list"
 	"github.com/bensallen/rbdmap/internal/cli/rbdmap"
 	"github.com/bensallen/rbdmap/internal/cli/unmap"
 	flag "github.com/spf13/pflag"
@@ -53,8 +54,8 @@ func Run(args []string, verbose bool, noop bool) error {
 	}
 
 	switch flags.Arg(1) {
-	case "list":
-		// return list.Run(args, verbose, noop)
+	case "list", "ls":
+		return list.Run(args, verbose, noop)
 	case "map":
 		return rbdmap.Run(args, verbose, noop)
 	case "unmap":

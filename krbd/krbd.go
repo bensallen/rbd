@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -46,13 +47,15 @@ func RBDBusRemoveWriter() (io.Writer, error) {
 // from /sys/device/rbd/<id>. Krbd struct tags are the sysfs file names that
 // are used, eg. for Pool - /sys/device/rbd/0/pool
 type Device struct {
-	ID        int
+	ID        int64
 	Pool      string `krbd:"pool"`
 	Namespace string `krbd:"pool_ns"`
 	Image     string `krbd:"name"`
 	Snapshot  string `krbd:"current_snap"`
 }
 
+// Devices iterates over /sys/bus/rbd/device/ to find all mapped RBD devices populating
+// attributes.
 func Devices() ([]Device, error) {
 	path := sysBusPath + "/devices"
 	return devices(path)
@@ -78,7 +81,8 @@ func devices(path string) ([]Device, error) {
 		if err != nil {
 			return nil, err
 		}
-		id, err := strconv.Atoi(p.Name())
+
+		id, err := strconv.ParseInt(p.Name(), 10, 0)
 		if err != nil {
 			return nil, err
 		}
@@ -89,6 +93,12 @@ func devices(path string) ([]Device, error) {
 		}
 		devices[i] = d
 	}
+
+	// Sort devices based on ID
+	sort.SliceStable(devices, func(i, j int) bool {
+		return devices[i].ID < devices[j].ID
+	})
+
 	return devices, nil
 }
 

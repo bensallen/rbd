@@ -37,7 +37,7 @@ func Test_devices(t *testing.T) {
 
 func TestDevice_readDeviceAttrs(t *testing.T) {
 	type fields struct {
-		ID        int
+		ID        int64
 		Pool      string
 		Namespace string
 		Image     string
