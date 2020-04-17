@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	"github.com/bensallen/rbdmap/krbd"
+	"github.com/bensallen/rbd/pkg/krbd"
 )
 
 const usageHeader = `list - List connected devices

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/bensallen/rbdmap/krbd"
+	"github.com/bensallen/rbd/pkg/krbd"
 )
 
 // Mount is filesystem mount specification including Ceph RBD Image mapping

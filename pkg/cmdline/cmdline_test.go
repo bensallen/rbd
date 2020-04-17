@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bensallen/rbdmap/krbd"
+	"github.com/bensallen/rbd/pkg/krbd"
 )
 
 func Test_split(t *testing.T) {

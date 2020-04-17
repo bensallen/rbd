@@ -1,4 +1,4 @@
-module github.com/bensallen/rbdmap
+module github.com/bensallen/rbd
 
 go 1.14
 
