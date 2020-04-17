@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bensallen/rbdmap/internal/cli/root"
+	"github.com/bensallen/rbd/internal/cli/root"
 )
 
 func main() {

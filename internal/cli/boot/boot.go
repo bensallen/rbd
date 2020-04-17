@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing/iotest"
 
-	"github.com/bensallen/rbdmap/cmdline"
-	"github.com/bensallen/rbdmap/krbd"
+	"github.com/bensallen/rbd/pkg/cmdline"
+	"github.com/bensallen/rbd/pkg/krbd"
 	flag "github.com/spf13/pflag"
 )
 

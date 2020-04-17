@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bensallen/rbdmap/internal/cli/boot"
-	"github.com/bensallen/rbdmap/internal/cli/device"
-	"github.com/bensallen/rbdmap/internal/cli/device/list"
-	"github.com/bensallen/rbdmap/internal/cli/rbdmap"
-	"github.com/bensallen/rbdmap/internal/cli/unmap"
+	"github.com/bensallen/rbd/internal/cli/boot"
+	"github.com/bensallen/rbd/internal/cli/device"
+	"github.com/bensallen/rbd/internal/cli/device/list"
+	"github.com/bensallen/rbd/internal/cli/rbdmap"
+	"github.com/bensallen/rbd/internal/cli/unmap"
 	flag "github.com/spf13/pflag"
 )
 
