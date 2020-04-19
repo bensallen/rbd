@@ -21,9 +21,10 @@ Flags:
 `
 
 var (
-	flags    = flag.NewFlagSet("boot", flag.ContinueOnError)
-	mkdir    = flags.BoolP("mkdir", "m", false, "Create the destination mount path if it doesn't exist")
-	procPath = flags.StringP("cmdline", "c", "/proc/cmdline", "Path to kernel cmdline (default: /proc/cmdline)")
+	flags      = flag.NewFlagSet("boot", flag.ContinueOnError)
+	mkdir      = flags.BoolP("mkdir", "m", false, "Create the destination mount path if it doesn't exist")
+	switchRoot = flags.BoolP("switch-root", "s", false, "Attempt to switch_root to root filesystem and execute /sbin/init")
+	procPath   = flags.StringP("cmdline", "c", "/proc/cmdline", "Path to kernel cmdline (default: /proc/cmdline)")
 )
 
 // Usage of the boot subcommand
@@ -85,7 +86,17 @@ func Run(args []string, verbose bool, noop bool) error {
 			}
 
 			// Attempt to mount the device
-			return mount.Mount(dev.DevPath(), mnt.Path, mnt.FsType, mnt.MountOpts)
+			if err := mount.Mount(dev.DevPath(), mnt.Path, mnt.FsType, mnt.MountOpts); err != nil {
+				return err
+			}
+		}
+		if *switchRoot {
+			if root, ok := mounts["root"]; ok {
+				if verbose {
+					log.Printf("Boot: attempting to switch root to %s with /sbin/init\n", root.Path)
+				}
+				return mount.SwitchRoot(root.Part, "/sbin/init")
+			}
 		}
 	}
 	return nil
