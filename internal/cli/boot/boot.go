@@ -22,6 +22,7 @@ Flags:
 
 var (
 	flags    = flag.NewFlagSet("boot", flag.ContinueOnError)
+	mkdir    = flags.BoolP("mkdir", "m", false, "Create the destination mount path if it doesn't exist")
 	procPath = flags.StringP("cmdline", "c", "/proc/cmdline", "Path to kernel cmdline (default: /proc/cmdline)")
 )
 
@@ -73,10 +74,14 @@ func Run(args []string, verbose bool, noop bool) error {
 				return err
 			}
 
-			fmt.Printf("Dev Found: %#v\n", dev)
+			if verbose {
+				log.Printf("Boot: device found %#v\n", dev)
+			}
 
-			if err := os.MkdirAll(mnt.Path, 0755); err != nil {
-				return err
+			if *mkdir {
+				if err := os.MkdirAll(mnt.Path, 0755); err != nil {
+					return err
+				}
 			}
 
 			// Attempt to mount the device
