@@ -8,6 +8,7 @@ import (
 
 	"github.com/bensallen/rbd/pkg/cmdline"
 	"github.com/bensallen/rbd/pkg/krbd"
+	"github.com/bensallen/rbd/pkg/mount"
 	flag "github.com/spf13/pflag"
 )
 
@@ -21,6 +22,7 @@ Flags:
 
 var (
 	flags    = flag.NewFlagSet("boot", flag.ContinueOnError)
+	mkdir    = flags.BoolP("mkdir", "m", false, "Create the destination mount path if it doesn't exist")
 	procPath = flags.StringP("cmdline", "c", "/proc/cmdline", "Path to kernel cmdline (default: /proc/cmdline)")
 )
 
@@ -54,16 +56,36 @@ func Run(args []string, verbose bool, noop bool) error {
 		w = iotest.NewWriteLogger("Boot:", w)
 	}
 
-	for name, mount := range mounts {
+	for name, mnt := range mounts {
 		log.Printf("Boot: mapping image %s from cmdline", name)
 
 		if noop {
-			log.Printf("%s", mount.Image)
+			log.Printf("%s", mnt.Image)
 		} else {
-			err = mount.Image.Map(w)
-			if err != nil {
+
+			// Map the RBD device
+			if err := mnt.Image.Map(w); err != nil {
 				return err
 			}
+
+			// Find the RBD device that was just mapped
+			dev := krbd.Device{Image: mnt.Image.Image, Pool: mnt.Image.Pool, Namespace: mnt.Image.Options.Namespace, Snapshot: mnt.Image.Snapshot}
+			if err := dev.Find(); err != nil {
+				return err
+			}
+
+			if verbose {
+				log.Printf("Boot: device found %#v\n", dev)
+			}
+
+			if *mkdir {
+				if err := os.MkdirAll(mnt.Path, 0755); err != nil {
+					return err
+				}
+			}
+
+			// Attempt to mount the device
+			return mount.Mount(dev.DevPath(), mnt.Path, mnt.FsType, mnt.MountOpts)
 		}
 	}
 	return nil

@@ -1,6 +1,7 @@
 package unmap
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -20,7 +21,7 @@ Flags:
 
 var (
 	flags = flag.NewFlagSet("unmap", flag.ContinueOnError)
-	devid = flags.IntP("devid", "d", 0, "RBD Device Index (default 0)")
+	devid = flags.IntP("devid", "d", -1, "RBD Device ID")
 	force = flags.BoolP("force", "f", false, "Optional force argument will wait for running requests and then unmap the image")
 )
 
@@ -30,12 +31,23 @@ func Usage() {
 	fmt.Fprintf(os.Stderr, flags.FlagUsagesWrapped(0)+"\n")
 }
 
+//Usage of rbd with error message
+func usageErr(err error) {
+	Usage()
+	fmt.Fprintf(os.Stderr, "Error: %v\n\n", err)
+}
+
 // Run the unmap subcommand
 func Run(args []string, verbose bool, noop bool) error {
 	flags.ParseErrorsWhitelist.UnknownFlags = true
 	if err := flags.Parse(args); err != nil {
 		Usage()
 		fmt.Printf("Error: %v\n\n", err)
+		os.Exit(2)
+	}
+
+	if *devid == -1 {
+		usageErr(errors.New("Device ID not specified"))
 		os.Exit(2)
 	}
 
