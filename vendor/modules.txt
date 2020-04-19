@@ -1,3 +1,10 @@
 # github.com/spf13/pflag v1.0.5
 ## explicit
 github.com/spf13/pflag
+# github.com/u-root/u-root v6.0.0+incompatible
+## explicit
+github.com/u-root/u-root/pkg/loop
+github.com/u-root/u-root/pkg/mount
+# golang.org/x/sys v0.0.0-20200413165638-669c56c373c4
+## explicit
+golang.org/x/sys/unix

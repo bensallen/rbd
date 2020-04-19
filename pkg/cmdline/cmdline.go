@@ -15,11 +15,11 @@ import (
 // configuration which was generated via parsed data from the kernel cmdline.
 type Mount struct {
 	Image     *krbd.Image
-	MountOpts string `json:"mntopts"`
+	MountOpts []string `json:"mntopts"`
 	Part      string
 	Overlay   bool
 	Path      string
-	Fstype    string
+	FsType    string
 }
 
 // Leading prefix for cmdline arguments

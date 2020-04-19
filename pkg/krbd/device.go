@@ -129,3 +129,9 @@ func (d *Device) find(devices []Device) error {
 	}
 	return errors.New("No match found")
 }
+
+// DevPath returns the string form of the Device expected device path, eg. /dev/rbd0
+// Does not validate that the device actually exists.
+func (d *Device) DevPath() string {
+	return "/dev/rbd" + strconv.FormatInt(d.ID, 10)
+}
