@@ -10,6 +10,7 @@ package mount
 import "golang.org/x/sys/unix"
 
 var opts = map[string]uintptr{
+	"rw":           0x0, // RW is the absence of MS_RDONLY so no-op
 	"active":       unix.MS_ACTIVE,
 	"async":        unix.MS_ASYNC,
 	"bind":         unix.MS_BIND,
@@ -30,11 +31,11 @@ var opts = map[string]uintptr{
 	"noremotelock": unix.MS_NOREMOTELOCK,
 	"nosec":        unix.MS_NOSEC,
 	"nosuid":       unix.MS_NOSUID,
-	// what is this
-	//"nouser":       unix.MS_NOUSER,
+	//"nouser":       unix.MS_NOUSER, // Looks like this results in EINVAL and is removed in more recent kernels
 	"posixacl":    unix.MS_POSIXACL,
 	"private":     unix.MS_PRIVATE,
 	"rdonly":      unix.MS_RDONLY,
+	"ro":          unix.MS_RDONLY, // Alias to rdonly
 	"rec":         unix.MS_REC,
 	"relatime":    unix.MS_RELATIME,
 	"remount":     unix.MS_REMOUNT,
