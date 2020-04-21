@@ -95,13 +95,13 @@ func main() {
 		},
 		{
 			Cmd:  "/bbin/rbd",
-			Args: []string{"/bbin/rbd", "boot", "--mkdir"},
+			Args: []string{"/bbin/rbd", "boot", "--mkdir", "--switch-root"},
 		},
-		{
+		/*{
 			Cmd:  "/bbin/switch_root",
 			Args: []string{"/bbin/switch_root", "/newroot", "/sbin/init"},
 			Exec: true,
-		},
+		},*/
 	}
 
 	modCmds, _ := loadModules()
