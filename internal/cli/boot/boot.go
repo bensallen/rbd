@@ -79,7 +79,7 @@ func Run(args []string, verbose bool, noop bool) error {
 				log.Printf("Boot: device found %#v\n", dev)
 			}
 
-			if mnt.Path != "" {
+			if mnt.Path == "" {
 				return fmt.Errorf("device path not set")
 			}
 
