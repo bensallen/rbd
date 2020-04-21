@@ -86,8 +86,8 @@ func main() {
 			Args: []string{"/bbin/sleep", "2"},
 		},
 		{
-			Cmd: "/bbin/modprobe",
-			Args: []string{"modprobe", "-a", "virtio_net", "virtio-rng", "virtio_blk", "af_packet", "rbd"}
+			Cmd:  "/bbin/modprobe",
+			Args: []string{"modprobe", "-a", "virtio_net", "virtio-rng", "virtio_blk", "af_packet", "rbd"},
 		},
 		{
 			Cmd:  "/bbin/dhclient",
@@ -95,7 +95,11 @@ func main() {
 		},
 		{
 			Cmd:  "/bbin/rbd",
-			Args: []string{"/bbin/rbd", "boot", "--mkdir", "--switch-root"},
+			Args: []string{"/bbin/rbd", "boot", "--mkdir"},
+		},
+		{
+			Cmd:  "/bbin/switch_root",
+			Args: []string{"/bbin/switch_root", "/newroot", "/sbin/init"},
 			Exec: true,
 		},
 	}
