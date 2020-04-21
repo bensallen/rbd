@@ -86,6 +86,10 @@ func main() {
 			Args: []string{"/bbin/sleep", "2"},
 		},
 		{
+			Cmd: "/bbin/modprobe",
+			Args: []string{"modprobe", "-a", "virtio_net", "virtio-rng", "virtio_blk", "af_packet", "rbd"}
+		},
+		{
 			Cmd:  "/bbin/dhclient",
 			Args: []string{"/bbin/dhclient", "-ipv6=false", "eth0"},
 		},
