@@ -10,8 +10,6 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -38,35 +36,7 @@ type command struct {
 
 const (
 	kernArgFile = "/proc/cmdline"
-	moduleFile  = "/modules.txt"
-	insmodCmd   = "/bbin/insmod"
 )
-
-// loadModules doesn't actually load the modules.  It just creates a list of commands to get executed
-// it reads moduleFile, and creates a list of insmod commands in order
-func loadModules() (cmds []command, e error) {
-	var f *os.File
-	if _, e = os.Stat(moduleFile); os.IsNotExist(e) {
-		fmt.Printf("%s does not exist, we will not load modules\n", moduleFile)
-		return
-	}
-	if f, e = os.Open(moduleFile); e != nil {
-		fmt.Printf("failed to open module file, %s: %v\n", moduleFile, e)
-		return
-	}
-	defer f.Close()
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		fmt.Printf("adding module to load list: %s\n", scanner.Text())
-		cmd := command{
-			Cmd:        insmodCmd,
-			Args:       []string{insmodCmd, scanner.Text()},
-			Background: false,
-		}
-		cmds = append(cmds, cmd)
-	}
-	return
-}
 
 func goExec(cmd *exec.Cmd) {
 	if err := cmd.Run(); err != nil {
@@ -98,14 +68,7 @@ func main() {
 			Args: []string{"/bbin/rbd", "--verbose", "boot", "--mkdir", "--switch-root"},
 			Exec: true,
 		},
-		/*{
-			Cmd:  "/bbin/switch_root",
-			Args: []string{"/bbin/switch_root", "/newroot", "/sbin/init"},
-			Exec: true,
-		},*/
 	}
-
-	modCmds, _ := loadModules()
 
 	cmdList = append(modCmds, cmdList...)
 
