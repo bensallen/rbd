@@ -70,8 +70,6 @@ func main() {
 		},
 	}
 
-	cmdList = append(modCmds, cmdList...)
-
 	envs := os.Environ()
 	os.MkdirAll(ioDir, os.ModeDir&ioMode)
 	var cmds []*exec.Cmd
