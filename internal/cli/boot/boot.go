@@ -79,6 +79,14 @@ func Run(args []string, verbose bool, noop bool) error {
 				log.Printf("Boot: device found %#v\n", dev)
 			}
 
+			if mnt.Path == "" {
+				return fmt.Errorf("device path not set")
+			}
+
+			if mnt.Path[0] != '/' {
+				return fmt.Errorf("device path not an absolute path")
+			}
+
 			if *mkdir {
 				if err := os.MkdirAll(mnt.Path, 0755); err != nil {
 					return err
@@ -95,7 +103,7 @@ func Run(args []string, verbose bool, noop bool) error {
 				if verbose {
 					log.Printf("Boot: attempting to switch root to %s with /sbin/init\n", root.Path)
 				}
-				return mount.SwitchRoot(root.Part, "/sbin/init")
+				return mount.SwitchRoot(root.Path, "/sbin/init")
 			}
 		}
 	}
