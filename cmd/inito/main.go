@@ -95,7 +95,7 @@ func main() {
 		},
 		{
 			Cmd:  "/bbin/rbd",
-			Args: []string{"/bbin/rbd", "boot", "--mkdir", "--switch-root"},
+			Args: []string{"/bbin/rbd", "--verbose", "boot", "--mkdir", "--switch-root"},
 		},
 		/*{
 			Cmd:  "/bbin/switch_root",
