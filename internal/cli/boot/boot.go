@@ -98,11 +98,24 @@ func Run(args []string, verbose bool, noop bool) error {
 				return err
 			}
 		}
-		if *switchRoot {
-			if root, ok := mounts["root"]; ok {
-				if verbose {
-					log.Printf("Boot: attempting to switch root to %s with /sbin/init\n", root.Path)
+	}
+
+	if root, ok := mounts["root"]; ok {
+		if root.Overlay {
+			if verbose {
+				log.Printf("Boot: attempting to mount overlay over %s\n", root.Path)
+			}
+			if !noop {
+				if err := mount.Overlay(root.Path); err != nil {
+					return err
 				}
+			}
+		}
+		if *switchRoot {
+			if verbose {
+				log.Printf("Boot: attempting to switch root to %s with /sbin/init\n", root.Path)
+			}
+			if !noop {
 				return mount.SwitchRoot(root.Path, "/sbin/init")
 			}
 		}
