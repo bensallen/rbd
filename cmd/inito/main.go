@@ -16,6 +16,8 @@ import (
 	"os/exec"
 	"strconv"
 	"syscall"
+
+	"github.com/bensallen/rbd/pkg/mount"
 )
 
 // info about background processes, inclding std{out,in,err} will be placed here
@@ -65,9 +67,17 @@ func main() {
 		},
 		{
 			Cmd:  "/bbin/rbd",
-			Args: []string{"/bbin/rbd", "--verbose", "boot", "--mkdir", "--switch-root"},
+			Args: []string{"/bbin/rbd", "--verbose", "boot", "--mkdir", "--switch-root=/sbin/init"},
 			Exec: true,
 		},
+	}
+
+	if err := os.MkdirAll("/run", 0755); err != nil {
+		log.Println(err)
+	}
+
+	if err := mount.Mount("tmpfs", "/run", "tmpfs", []string{"rw", "nosuid", "nodev", "mode=755"}); err != nil {
+		log.Println(err)
 	}
 
 	envs := os.Environ()

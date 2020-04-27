@@ -23,8 +23,22 @@ Flags:
 var (
 	flags      = flag.NewFlagSet("boot", flag.ContinueOnError)
 	mkdir      = flags.BoolP("mkdir", "m", false, "Create the destination mount path if it doesn't exist")
-	switchRoot = flags.BoolP("switch-root", "s", false, "Attempt to switch_root to root filesystem and execute /sbin/init")
+	switchRoot = flags.StringP("switch-root", "s", "", "Attempt to switch_root to root filesystem and execute provided init path")
 	procPath   = flags.StringP("cmdline", "c", "/proc/cmdline", "Path to kernel cmdline (default: /proc/cmdline)")
+)
+
+const (
+	// RootPath is the path that is prepended for all mounts, and is the path that will be switch_root'ed to
+	// if a root mounted is mounted.
+	RootPath = "/newroot"
+
+	// OverlayPath is used when the root mount indicates that a overlay should be used. The upper and work directories are
+	// created under this directory as OverlayPath + "/upper" and OverlayPath + "/work".
+	OverlayPath = "/run/overlayfs"
+
+	// OverlayRootPath is the path that is prepended for all mounts when the root mount indicates that a overlay
+	// should be mounted over it. The overlay mounts to RootPath and switch_root still switches to RootPath.
+	OverlayRootPath = "/run/overlayfs/lower"
 )
 
 // Usage of the boot subcommand
@@ -55,6 +69,17 @@ func Run(args []string, verbose bool, noop bool) error {
 
 	if verbose {
 		w = iotest.NewWriteLogger("Boot:", w)
+	}
+
+	// Set the prepended mount path
+	mntPrefix := RootPath
+	if root, ok := mounts["root"]; ok {
+		if root.Path != "/" {
+			return fmt.Errorf("root path must be set to '/'")
+		}
+		if root.Overlay {
+			mntPrefix = OverlayRootPath
+		}
 	}
 
 	for name, mnt := range mounts {
@@ -88,13 +113,13 @@ func Run(args []string, verbose bool, noop bool) error {
 			}
 
 			if *mkdir {
-				if err := os.MkdirAll(mnt.Path, 0755); err != nil {
+				if err := os.MkdirAll(mntPrefix+mnt.Path, 0755); err != nil {
 					return err
 				}
 			}
 
 			// Attempt to mount the device
-			if err := mount.Mount(dev.DevPath(), mnt.Path, mnt.FsType, mnt.MountOpts); err != nil {
+			if err := mount.Mount(dev.DevPath(), mntPrefix+mnt.Path, mnt.FsType, mnt.MountOpts); err != nil {
 				return err
 			}
 		}
@@ -103,20 +128,20 @@ func Run(args []string, verbose bool, noop bool) error {
 	if root, ok := mounts["root"]; ok {
 		if root.Overlay {
 			if verbose {
-				log.Printf("Boot: attempting to mount overlay over %s\n", root.Path)
+				log.Printf("Boot: attempting to mount root overlay to %s\n", RootPath)
 			}
 			if !noop {
-				if err := mount.Overlay(root.Path); err != nil {
+				if err := mount.Overlay(OverlayRootPath, OverlayPath+"/upper", OverlayPath+"/work", RootPath); err != nil {
 					return err
 				}
 			}
 		}
-		if *switchRoot {
+		if *switchRoot != "" {
 			if verbose {
-				log.Printf("Boot: attempting to switch root to %s with /sbin/init\n", root.Path)
+				log.Printf("Boot: attempting to switch root to %s with init %s\n", RootPath, *switchRoot)
 			}
 			if !noop {
-				return mount.SwitchRoot(root.Path, "/sbin/init")
+				return mount.SwitchRoot(RootPath, *switchRoot)
 			}
 		}
 	}
