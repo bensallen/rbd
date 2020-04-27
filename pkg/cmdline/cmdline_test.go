@@ -87,8 +87,8 @@ func TestParse(t *testing.T) {
 	}{
 		{
 			name: "rbd.root=",
-			args: args{cmdline: `rbd={"root": {"image":{"mons": ["192.168.0.1","192.168.0.2","192.168.0.3:6789"], "opts":{"name": "admin", "secret": "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q=="}, "pool":"rbd", "image":"test-image1"}, "path":"/newroot", "fstype":"ext4", "overlay": true}}`},
-			want: map[string]*Mount{"root": {Image: &krbd.Image{Monitors: []string{"192.168.0.1", "192.168.0.2", "192.168.0.3:6789"}, Options: &krbd.Options{Name: "admin", Secret: "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q=="}, Pool: "rbd", Image: "test-image1"}, Path: "/newroot", FsType: "ext4", Overlay: true}},
+			args: args{cmdline: `rbd={"root": {"image":{"mons": ["192.168.0.1","192.168.0.2","192.168.0.3:6789"], "opts":{"name": "admin", "secret": "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q==", "readonly": true}, "pool":"rbd", "image":"test-image1"}, "path":"/newroot", "fstype":"ext4", "overlay": true}}`},
+			want: map[string]*Mount{"root": {Image: &krbd.Image{Monitors: []string{"192.168.0.1", "192.168.0.2", "192.168.0.3:6789"}, Options: &krbd.Options{Name: "admin", Secret: "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q==", ReadOnly: true}, Pool: "rbd", Image: "test-image1"}, Path: "/newroot", FsType: "ext4", Overlay: true}},
 		},
 		{
 			name: "rbd.root= specified twice with different attributes",
