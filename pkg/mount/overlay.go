@@ -4,23 +4,15 @@ import (
 	"os"
 )
 
-// Overlay prepares and mounts a R/W overlay over the provided path. Mounts /run as a tmpfs and uses
-// /run/overlayfs/rw as the upper and /run/overlayfs/work as the workdir.
-func Overlay(path string) error {
-	if err := os.MkdirAll("/run", 0755); err != nil {
-		return err
+// Overlay prepares and mounts a R/W overlay on the dest path. Expects lower to already be
+// mounted. Create's dest, upper, and work directories. Upper and work is required to be paths
+// within the same filesystem.
+func Overlay(lower string, upper string, work string, dest string) error {
+	for _, dir := range []string{upper, work, dest} {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return err
+		}
 	}
 
-	if err := Mount("tmpfs", "/run", "tmpfs", []string{"rw", "nosuid", "nodev", "mode=755"}); err != nil {
-		return err
-	}
-
-	if err := os.MkdirAll("/run/overlayfs/rw", 0755); err != nil {
-		return err
-	}
-	if err := os.MkdirAll("/run/overlayfs/work", 0755); err != nil {
-		return err
-	}
-
-	return Mount("overlay", "/newroot", "overlay", []string{"lowerdir=" + path, "upperdir=/run/overlayfs/rw", "workdir=/run/overlayfs/work"})
+	return Mount("overlay", dest, "overlay", []string{"lowerdir=" + lower, "upperdir=" + upper, "workdir=" + work})
 }
