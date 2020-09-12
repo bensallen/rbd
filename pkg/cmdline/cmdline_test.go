@@ -87,18 +87,18 @@ func TestParse(t *testing.T) {
 	}{
 		{
 			name: "rbd.root=",
-			args: args{cmdline: `rbd={"root": {"image":{"mons": ["192.168.0.1","192.168.0.2","192.168.0.3:6789"], "opts":{"name": "admin", "secret": "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q==", "readonly": true}, "pool":"rbd", "image":"test-image1"}, "path":"/newroot", "fstype":"ext4", "overlay": true}}`},
-			want: map[string]*Mount{"root": {Image: &krbd.Image{Monitors: []string{"192.168.0.1", "192.168.0.2", "192.168.0.3:6789"}, Options: &krbd.Options{Name: "admin", Secret: "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q==", ReadOnly: true}, Pool: "rbd", Image: "test-image1"}, Path: "/newroot", FsType: "ext4", Overlay: true}},
+			args: args{cmdline: `rbd={"root": {"image":{"mons": ["192.168.0.1","192.168.0.2","192.168.0.3:6789"], "opts":{"name": "admin", "secret": "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q==", "readonly": true}, "pool":"rbd", "image":"test-image1"}, "path":"/", "fstype":"ext4", "overlay": true}}`},
+			want: map[string]*Mount{"root": {Image: &krbd.Image{Monitors: []string{"192.168.0.1", "192.168.0.2", "192.168.0.3:6789"}, Options: &krbd.Options{Name: "admin", Secret: "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q==", ReadOnly: true}, Pool: "rbd", Image: "test-image1"}, Path: "/", FsType: "ext4", Overlay: true}},
 		},
 		{
 			name: "rbd.root= specified twice with different attributes",
-			args: args{cmdline: `rbd.root={"image":{"pool":"rbd", "image":"test-image1"}} rbd.root={"path":"/newroot", "fstype":"ext4"}`},
-			want: map[string]*Mount{"root": {Image: &krbd.Image{Pool: "rbd", Image: "test-image1"}, Path: "/newroot", FsType: "ext4"}},
+			args: args{cmdline: `rbd.root={"image":{"pool":"rbd", "image":"test-image1"}} rbd.root={"path":"/", "fstype":"ext4"}`},
+			want: map[string]*Mount{"root": {Image: &krbd.Image{Pool: "rbd", Image: "test-image1"}, Path: "/", FsType: "ext4"}},
 		},
 		{
 			name: "rbd=",
-			args: args{cmdline: `rbd={"root":{"image":{"pool":"rbd", "image":"test-image1"}, "path":"/newroot", "fstype":"ext4"}}`},
-			want: map[string]*Mount{"root": {Image: &krbd.Image{Pool: "rbd", Image: "test-image1"}, Path: "/newroot", FsType: "ext4"}},
+			args: args{cmdline: `rbd={"root":{"image":{"pool":"rbd", "image":"test-image1"}, "path":"/", "fstype":"ext4"}}`},
+			want: map[string]*Mount{"root": {Image: &krbd.Image{Pool: "rbd", Image: "test-image1"}, Path: "/", FsType: "ext4"}},
 		},
 		{
 			name: "Garbage JSON",
@@ -122,8 +122,8 @@ func TestParse(t *testing.T) {
 		},
 		{
 			name: "Unrelated cmdline args with rbd",
-			args: args{cmdline: `nomodeset earlyprintk=ttyS0 console=ttyS0 rbd={"root":{"image":{"pool":"rbd", "image":"test-image1"}, "path":"/newroot", "fstype":"ext4"}}`},
-			want: map[string]*Mount{"root": {Image: &krbd.Image{Pool: "rbd", Image: "test-image1"}, Path: "/newroot", FsType: "ext4"}},
+			args: args{cmdline: `nomodeset earlyprintk=ttyS0 console=ttyS0 rbd={"root":{"image":{"pool":"rbd", "image":"test-image1"}, "path":"/", "fstype":"ext4"}}`},
+			want: map[string]*Mount{"root": {Image: &krbd.Image{Pool: "rbd", Image: "test-image1"}, Path: "/", FsType: "ext4"}},
 		},
 	}
 	for _, tt := range tests {
