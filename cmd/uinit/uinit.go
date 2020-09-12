@@ -1,10 +1,19 @@
-/* uinit.go: a simple init launcher for kraken layer0
+/* uinit.go: a simple init launcher
+ * Work based on https://github.com/hpc/kraken/blob/master/utils/layer0/uinit/uinit.go
  *
  * Author: J. Lowell Wofford <lowell@lanl.gov>
+ * Author: Benjamin S. Allen <bsallen@alcf.anl.gov>
  *
  * This software is open source software available under the BSD-3 license.
  * Copyright (c) 2018, Triad National Security, LLC
+ * Copyright (c) 2020, Benjamin S. Allen
  * See LICENSE file for details.
+ */
+
+/* For switch_root'ing to systemd, u-root's init has special casing.
+ * This app needs to be added into the u-root initramfs as /inito and
+ * the kernel cmdline uroot.initflags="systemd" needs to be used
+ * see https://github.com/u-root/u-root/blob/master/cmds/core/init/init_linux.go#L81
  */
 
 package main
@@ -63,7 +72,7 @@ func main() {
 		},
 		{
 			Cmd:  "/bbin/modprobe",
-			Args: []string{"modprobe", "-a", "rbd", "squashfs", "overlay"},
+			Args: []string{"modprobe", "-a", "rbd", "squashfs", "overlay", "af_packet"},
 		},
 		{
 			Cmd:  "/bbin/dhclient",
