@@ -45,8 +45,8 @@ const prefix = "rbd"
 // rbd.root.path=/newroot
 //
 // JSON
-// rbd={"root": {"image":{"mons": ["192.168.0.1","192.168.0.2","192.168.0.3:6789"], "opts":{"name": "admin", "secret": "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q=="}, "pool":"rbd", "image":"test-image1"}, "path":"/newroot", "fstype":"ext4"}}
-// rbd.root={"image":{"mons": ["192.168.0.1","192.168.0.2","192.168.0.3:6789"], "opts":{"name": "admin", "secret": "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q=="}, "pool":"rbd", "image":"test-image1"}, "path":"/newroot", "fstype":"ext4"}
+// rbd={"root": {"image":{"mons": ["192.168.0.1","192.168.0.2","192.168.0.3:6789"], "opts":{"name": "admin", "secret": "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q=="}, "pool":"rbd", "image":"test-image1"}, "path":"/", "fstype":"ext4"}}
+// rbd.root={"image":{"mons": ["192.168.0.1","192.168.0.2","192.168.0.3:6789"], "opts":{"name": "admin", "secret": "AQAvjX9eabfZAhAAj/g5nXSe/uaemYGCu1w53Q=="}, "pool":"rbd", "image":"test-image1"}, "path":"/", "fstype":"ext4"}
 func Parse(cmdline string) map[string]*Mount {
 	log.Printf("Debug: %s", cmdline)
 
