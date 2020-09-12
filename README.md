@@ -58,9 +58,15 @@ Flags:
 
 ## Boot
 
-- Unfinished, only maps devices so far.
-- Parse /proc/cmdline for RBD settings and attempt to pivot_root.
-- See https://github.com/bensallen/rbd/blob/master/pkg/cmdline/cmdline.go#L50 for cmdline format
+Tooling for booting from one or more RBD images.
+
+1. Parses /proc/cmdline for RBD settings
+2. Maps and mounts the image.
+3. Mount's an overlayfs over the mountpoint if configured.
+4. If argument is passed via the CLI, attempts to switch_root (typically requires being PID 1).
+
+- See https://github.com/bensallen/rbd/blob/master/pkg/cmdline/cmdline.go#L50 for cmdline format (limited to JSON form currently)
+- Currently requires passing the cephx secret via cmdline, which is not ideal.
 
 ```
 $ rbd boot -h
@@ -70,7 +76,9 @@ Usage:
   boot
 
 Flags:
-  -c, --cmdline string   Path to kernel cmdline (default: /proc/cmdline) (default "/proc/cmdline")
+  -c, --cmdline string       Path to kernel cmdline (default: /proc/cmdline) (default "/proc/cmdline")
+  -m, --mkdir                Create the destination mount path if it doesn't exist
+  -s, --switch-root string   Attempt to switch_root to root filesystem and execute provided init path
 ```
 
 ## Device 
