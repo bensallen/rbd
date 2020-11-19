@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/u-root/u-root/pkg/loop"
 	"github.com/u-root/u-root/pkg/mount"
+	"github.com/u-root/u-root/pkg/mount/loop"
 )
 
 func loopSetup(filename string) (loopDevice string, err error) {
@@ -53,5 +53,6 @@ func Mount(dev string, path string, fsType string, options []string) error {
 		}
 	}
 
-	return mount.Mount(dev, path, fsType, strings.Join(data, ","), flags)
+	_, err = mount.Mount(dev, path, fsType, strings.Join(data, ","), flags)
+	return err
 }
