@@ -25,20 +25,20 @@ func unshareRoot(newRoot, init string) (err error) {
 	//    We implement this by bind mounting newRoot on itself.
 	if !isMountpoint(newRoot) {
 		if err = bindMountSelf(newRoot); err != nil {
-			return fmt.Errorf("clone: error: could not self-bind mount bare directory: %v", err)
+			return fmt.Errorf("clone: could not self-bind mount bare directory: %v", err)
 		}
 	}
 
 	// 1. Is our image valid?
 	log.Print("validating image")
 	if err = validateImage(newRoot); err != nil {
-		return fmt.Errorf("clone: error: image validation failed: %v", err)
+		return fmt.Errorf("clone: image validation failed: %v", err)
 	}
 
 	// 2. Is our init valid?
 	log.Print("validating init")
 	if err = validateInit(newRoot, init); err != nil {
-		return fmt.Errorf("clone: error: init validationfailed: %v", err)
+		return fmt.Errorf("clone: init validationfailed: %v", err)
 	}
 
 	// 3. Create new namespaces
@@ -50,7 +50,7 @@ func unshareRoot(newRoot, init string) (err error) {
 	// 4. Do the root moving dance
 	log.Print("preparing image")
 	if err = moveRoot(newRoot); err != nil {
-		return fmt.Errorf("switch_root: error: could not prepare image: %v", err)
+		return fmt.Errorf("switch_root: could not prepare image: %v", err)
 	}
 
 	// 5. Exec container
@@ -71,25 +71,25 @@ func switchRoot(newRoot, init string) (err error) {
 	// 1. Is our image valid?
 	log.Print("validating image")
 	if err = validateImage(newRoot); err != nil {
-		return fmt.Errorf("switch_root: error: image validation failed: %v", err)
+		return fmt.Errorf("switch_root: image validation failed: %v", err)
 	}
 
 	// 2. Is our init valid?
 	log.Print("validating init")
 	if err = validateInit(newRoot, init); err != nil {
-		return fmt.Errorf("switch_root: error: init validationfailed: %v", err)
+		return fmt.Errorf("switch_root: init validationfailed: %v", err)
 	}
 
 	// 3. Open old root for later cleanup
 	if oldRoot, err = unix.Open("/", unix.O_DIRECTORY, unix.O_RDONLY); err != nil {
-		return fmt.Errorf("switch_root: error: could not open /: %v", err)
+		return fmt.Errorf("switch_root: could not open /: %v", err)
 	}
 	defer unix.Close(oldRoot)
 
 	// 4. Do the root moving dance
 	log.Print("preparing image")
 	if err = moveRoot(newRoot); err != nil {
-		return fmt.Errorf("switch_root: error: could not prepare image: %v", err)
+		return fmt.Errorf("switch_root: could not prepare image: %v", err)
 	}
 
 	// 5. Clean up old root (if its a ramdisk). This is best-effort only.
@@ -101,7 +101,7 @@ func switchRoot(newRoot, init string) (err error) {
 	// 6. Exec init
 	log.Print("executing init")
 	if err = unix.Exec(init, []string{init}, []string{}); err != nil {
-		return fmt.Errorf("switch_root: error: exec failed: %v", err)
+		return fmt.Errorf("switch_root: exec failed: %v", err)
 	}
 	return
 }
@@ -205,7 +205,7 @@ func moveMount(newRoot, mount string) (err error) {
 	if err = unix.Mount(mount, joined, "", unix.MS_MOVE, ""); err != nil {
 		// we still force an unmount
 		unix.Unmount(mount, unix.MNT_FORCE)
-		return fmt.Errorf("mount move failed, old mount force unmounted")
+		return fmt.Errorf("mount move failed, old mount force unmounted: %v", err)
 	}
 	return
 }
@@ -226,15 +226,15 @@ func moveRoot(newRoot string) (err error) {
 	}
 	// 3. Move newRoot -> /
 	if err = unix.Mount(newRoot, "/", "", unix.MS_MOVE, ""); err != nil {
-		return fmt.Errorf("failed to move new root to /")
+		return fmt.Errorf("failed to move new root to /: %v", err)
 	}
 	// 4. chroot "."
 	if err = unix.Chroot("."); err != nil {
-		return fmt.Errorf("failed to change root")
+		return fmt.Errorf("failed to change root: %v", err)
 	}
 	// 5. chdir to / (because we're currently stranded)
 	if err = os.Chdir("/"); err != nil {
-		return fmt.Errorf("failed to chdir to /")
+		return fmt.Errorf("failed to chdir to /: %v", err)
 	}
 	// the dance is done
 	return
