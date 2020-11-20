@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing/iotest"
 
+	"github.com/bensallen/rbd/pkg/boot"
 	"github.com/bensallen/rbd/pkg/cmdline"
 	"github.com/bensallen/rbd/pkg/krbd"
 	"github.com/bensallen/rbd/pkg/mount"
@@ -21,10 +22,11 @@ Flags:
 `
 
 var (
-	flags      = flag.NewFlagSet("boot", flag.ContinueOnError)
-	mkdir      = flags.BoolP("mkdir", "m", false, "Create the destination mount path if it doesn't exist")
-	switchRoot = flags.StringP("switch-root", "s", "", "Attempt to switch_root to root filesystem and execute provided init path")
-	procPath   = flags.StringP("cmdline", "c", "/proc/cmdline", "Path to kernel cmdline (default: /proc/cmdline)")
+	flags       = flag.NewFlagSet("boot", flag.ContinueOnError)
+	mkdir       = flags.BoolP("mkdir", "m", false, "Create the destination mount path if it doesn't exist")
+	switchRoot  = flags.StringP("switch-root", "s", "", "Attempt to switch_root to root filesystem and execute provided init path")
+	unshareRoot = flags.StringP("unshare", "u", "", "Attempt to execute init in a namespaced context (container) inside the root filesystem")
+	procPath    = flags.StringP("cmdline", "c", "/proc/cmdline", "Path to kernel cmdline (default: /proc/cmdline)")
 )
 
 const (
@@ -141,7 +143,15 @@ func Run(args []string, verbose bool, noop bool) error {
 				log.Printf("Boot: attempting to switch root to %s with init %s\n", RootPath, *switchRoot)
 			}
 			if !noop {
-				return mount.SwitchRoot(RootPath, *switchRoot)
+				return boot.SwitchRoot(RootPath, *switchRoot)
+			}
+		}
+		if *unshareRoot != "" {
+			if verbose {
+
+			}
+			if !noop {
+				return boot.UnshareRoot(RootPath, *unshareRoot)
 			}
 		}
 	}
