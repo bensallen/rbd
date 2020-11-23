@@ -47,13 +47,19 @@ func unshareRoot(newRoot, init string) (err error) {
 		return fmt.Errorf("clone: failed to unshare namespaces: %v", err)
 	}
 
-	// 4. Do the root moving dance
+	// 4. Make sure mounts are marked as private, necessary for moving mounts
+	log.Print("making all mounts private")
+	if err = makeMountsPrivate(); err != nil {
+		return fmt.Errorf("clone: failed to make mounts private: %v", err)
+	}
+
+	// 5. Do the root moving dance
 	log.Print("preparing image")
 	if err = moveRoot(newRoot); err != nil {
 		return fmt.Errorf("switch_root: could not prepare image: %v", err)
 	}
 
-	// 5. Exec container
+	// 6. Exec container
 	c := exec.Command(init)
 	if err = c.Run(); err != nil {
 		return fmt.Errorf("clone: failed to start init: %v", err)
@@ -314,6 +320,10 @@ func recursiveDelete(fd int) {
 	}
 
 	return
+}
+
+func makeMountsPrivate() error {
+	return unix.Mount("", "/", "", unix.MS_REC|unix.MS_PRIVATE, "")
 }
 
 func bindMountSelf(path string) (err error) {
