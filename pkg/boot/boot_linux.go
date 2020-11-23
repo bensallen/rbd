@@ -60,13 +60,16 @@ func unshareRoot(newRoot, init string) (err error) {
 	}
 
 	// 6. Exec container
-	log.Print("executing init")
-	c := exec.Command(init)
+	log.Print("launching pid_init")
+	c := exec.Command("/proc/self/exe")
 	c.Stdin = os.Stdin
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
+	c.Env = os.Environ()
+	c.Env = append(c.Env, "RBD_INIT="+init)
+
 	if err = c.Run(); err != nil {
-		return fmt.Errorf("clone: failed to start init: %v", err)
+		return fmt.Errorf("clone: failed to start pid_init: %v", err)
 	}
 	return
 }
@@ -342,6 +345,20 @@ func bindMountSelf(path string) (err error) {
 	return
 }
 
-func unshareMount() (err error) {
-	return
+// We should do things best effort here, because failures are fatal
+func pidInit(init string) {
+	log.SetPrefix(log.Prefix() + "pid_init: ")
+	log.Print("initializing PID namespace")
+	if isMountpoint("/proc") {
+		if err := unix.Unmount("/proc", unix.MNT_DETACH); err != nil {
+			log.Printf("warn: could not unmount /proc, will overlay instead: %v", err)
+		}
+	}
+	if err := unix.Mount("proc", "/proc", "proc", unix.MS_NODEV|unix.MS_NOSUID|unix.MS_NOEXEC, ""); err != nil {
+		log.Printf("warn: /proc mount failed: %v", err)
+	}
+	log.Print("executing init")
+	if err := unix.Exec(init, []string{init}, []string{}); err != nil {
+		log.Fatalf("pid_init: exec failed: %v", err)
+	}
 }
