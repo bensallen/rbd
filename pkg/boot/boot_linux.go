@@ -60,7 +60,11 @@ func unshareRoot(newRoot, init string) (err error) {
 	}
 
 	// 6. Exec container
+	log.Print("executing init")
 	c := exec.Command(init)
+	c.Stdin = os.Stdin
+	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
 	if err = c.Run(); err != nil {
 		return fmt.Errorf("clone: failed to start init: %v", err)
 	}
