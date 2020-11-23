@@ -265,13 +265,10 @@ func moveRoot(newRoot string) (err error) {
 		return fmt.Errorf("failed to move new root to /: %v", err)
 	}
 	// 4. chroot "."
-	if err = unix.Chroot("."); err != nil {
+	if _, err = chroot("."); err != nil {
 		return fmt.Errorf("failed to change root: %v", err)
 	}
-	// 5. chdir to / (because we're currently stranded)
-	if err = os.Chdir("/"); err != nil {
-		return fmt.Errorf("failed to chdir to /: %v", err)
-	}
+
 	// the dance is done
 	return
 }
