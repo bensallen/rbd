@@ -176,18 +176,29 @@ func validateImage(newRoot string) (err error) {
 
 func validateInit(newRoot, init string) (err error) {
 	var stat os.FileInfo
-	var joined string
-	if joined, err = filepath.EvalSymlinks(filepath.Join(newRoot, init)); err != nil {
-		return fmt.Errorf("init file could not be found")
+	var realInit string
+	var exit func() error
+
+	if exit, err = chroot(newRoot); err != nil {
+		return fmt.Errorf("could not chroot into %s: %v", newRoot, err)
 	}
-	if stat, err = os.Stat(joined); err != nil {
-		return fmt.Errorf("init file could not be opened")
+
+	if realInit, err = filepath.EvalSymlinks(init); err != nil {
+		return fmt.Errorf("init file could not be found: %v", err)
+	}
+
+	if err := exit(); err != nil {
+		return fmt.Errorf("could not exit chroot: %v", err)
+	}
+
+	if stat, err = os.Stat(filepath.Join(newRoot, realInit)); err != nil {
+		return fmt.Errorf("init file could not be opened: %v", err)
 	}
 	if !stat.Mode().IsRegular() {
-		return fmt.Errorf("init does not reference a regular file")
+		return fmt.Errorf("init does not reference a regular file: %v", err)
 	}
 	if stat.Mode()&0111 == 0 {
-		return fmt.Errorf("init file is not executable")
+		return fmt.Errorf("init file is not executable: %v", err)
 	}
 	return
 }
@@ -208,6 +219,31 @@ func moveMount(newRoot, mount string) (err error) {
 		return fmt.Errorf("mount move failed, old mount force unmounted: %v", err)
 	}
 	return
+}
+
+func chroot(path string) (func() error, error) {
+	root, err := os.Open("/")
+	if err != nil {
+		return nil, err
+	}
+
+	if err := unix.Chroot(path); err != nil {
+		root.Close()
+		return nil, err
+	}
+
+	if err := os.Chdir("/"); err != nil {
+		root.Close()
+		return nil, err
+	}
+
+	return func() error {
+		defer root.Close()
+		if err := root.Chdir(); err != nil {
+			return err
+		}
+		return unix.Chroot(".")
+	}, nil
 }
 
 // this is the workhorse for all schemes
