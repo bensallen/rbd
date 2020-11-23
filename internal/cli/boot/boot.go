@@ -148,7 +148,7 @@ func Run(args []string, verbose bool, noop bool) error {
 		}
 		if *unshareRoot != "" {
 			if verbose {
-
+				log.Printf("Boot: attempting to execute init in a namespaced context %s with init %s\n", RootPath, *unshareRoot)
 			}
 			if !noop {
 				return boot.UnshareRoot(RootPath, *unshareRoot)
