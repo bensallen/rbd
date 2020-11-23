@@ -65,6 +65,8 @@ func unshareRoot(newRoot, init string) (err error) {
 	c.Stdin = os.Stdin
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
+	// busy box systems like u-root might need this
+	c.Args = []string{os.Args[0]}
 	c.Env = os.Environ()
 	c.Env = append(c.Env, "RBD_INIT="+init)
 
