@@ -2,6 +2,7 @@ package boot
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"testing/iotest"
@@ -64,7 +65,9 @@ func Run(args []string, verbose bool, noop bool) error {
 
 	mounts := cmdline.Parse(string(procCmdline))
 
-	w, err := krbd.RBDBusAddWriter()
+	wc, err := krbd.RBDBusAddWriter()
+	defer wc.Close()
+	w := wc.(io.Writer)
 	if err != nil {
 		return err
 	}

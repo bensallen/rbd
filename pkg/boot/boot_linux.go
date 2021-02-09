@@ -16,6 +16,7 @@ var specialMounts = []string{"/dev", "/proc", "/sys", "/run"}
 
 // unshareRoot starts init in a namespaced context (container)
 // Currently we only do mount + pid namespaces
+// This should be used iff we intend the current process to be taken over
 func unshareRoot(newRoot, init string) (err error) {
 	log.SetPrefix(log.Prefix() + "clone: ")
 
