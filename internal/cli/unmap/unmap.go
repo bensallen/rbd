@@ -3,6 +3,7 @@ package unmap
 import (
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"testing/iotest"
@@ -51,7 +52,9 @@ func Run(args []string, verbose bool, noop bool) error {
 		os.Exit(2)
 	}
 
-	w, err := krbd.RBDBusRemoveWriter()
+	wc, err := krbd.RBDBusRemoveWriter()
+	defer wc.Close()
+	w := wc.(io.Writer)
 	if err != nil {
 		return err
 	}

@@ -11,7 +11,7 @@ import (
 const sysBusPath = "/sys/bus/rbd"
 
 // RBDBusAddWriter returns an io.Writer with the appropriate sysfs rbd/add opened.
-func RBDBusAddWriter() (io.Writer, error) {
+func RBDBusAddWriter() (io.WriteCloser, error) {
 	rbdBusAddSingleMajor := sysBusPath + "/add_single_major"
 	rbdBusAdd := sysBusPath + "/add"
 
@@ -24,7 +24,7 @@ func RBDBusAddWriter() (io.Writer, error) {
 }
 
 // RBDBusRemoveWriter returns an io.Writer with the appropriate sysfs rbd/remove opened.
-func RBDBusRemoveWriter() (io.Writer, error) {
+func RBDBusRemoveWriter() (io.WriteCloser, error) {
 	rbdBusAddSingleMajor := sysBusPath + "/remove_single_major"
 	rbdBusAdd := sysBusPath + "/remove"
 
