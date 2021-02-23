@@ -17,9 +17,9 @@ import (
 type Device struct {
 	ID        int64
 	Pool      string `krbd:"pool"`
-	Namespace string `krbd:"pool_ns"`
+	Namespace string `krbd:"pool_ns,optional"`
 	Image     string `krbd:"name"`
-	Snapshot  string `krbd:"current_snap"`
+	Snapshot  string `krbd:"current_snap,optional"`
 }
 
 // Devices iterates over /sys/bus/rbd/device/ to find all mapped RBD devices populating
@@ -76,13 +76,16 @@ func (d *Device) readDeviceAttrs(path string) error {
 
 	// Iterate over all available struct fields
 	for i := 0; i < t.NumField(); i++ {
-		tag := t.Field(i).Tag.Get("krbd")
-		if tag != "" {
-			r, err := os.Open(path + "/" + tag)
-			defer r.Close()
+		tag := getDeviceTag(t.Field(i))
+		if tag.name != "" {
+			r, err := os.Open(path + "/" + tag.name)
 			if err != nil {
+				if tag.optional {
+					continue
+				}
 				return err
 			}
+			defer r.Close()
 			value, err := ioutil.ReadAll(r)
 			if err != nil {
 				return err
@@ -134,4 +137,27 @@ func (d *Device) find(devices []Device) error {
 // Does not validate that the device actually exists.
 func (d *Device) DevPath() string {
 	return "/dev/rbd" + strconv.FormatInt(d.ID, 10)
+}
+
+// tag parsing
+
+type deviceTag struct {
+	name     string
+	optional bool
+}
+
+func getDeviceTag(f reflect.StructField) (d deviceTag) {
+	s := f.Tag.Get("krbd")
+	if s == "" {
+		return
+	}
+	ss := strings.Split(s, ",")
+	d.name = ss[0]
+	for i := 1; i < len(ss); i++ {
+		switch ss[i] {
+		case "optional":
+			d.optional = true
+		}
+	}
+	return
 }
