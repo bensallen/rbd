@@ -80,7 +80,7 @@ func (d *Device) readDeviceAttrs(path string) error {
 		if tag.name != "" {
 			r, err := os.Open(path + "/" + tag.name)
 			if err != nil {
-				if tag.optional {
+				if tag.optional && errors.Is(err, os.ErrNotExist) {
 					continue
 				}
 				return err
