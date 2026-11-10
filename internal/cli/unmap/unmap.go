@@ -29,7 +29,7 @@ var (
 // Usage of the unmap subcommand
 func Usage() {
 	fmt.Fprintf(os.Stderr, usageHeader)
-	fmt.Fprintf(os.Stderr, flags.FlagUsagesWrapped(0)+"\n")
+	fmt.Fprint(os.Stderr, flags.FlagUsagesWrapped(0)+"\n")
 }
 
 //Usage of rbd with error message

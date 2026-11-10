@@ -41,7 +41,7 @@ Flags:
 //Usage of rbd command printed to stderr
 func usage() {
 	fmt.Fprintf(os.Stderr, usageHeader)
-	fmt.Fprintf(os.Stderr, rootFlags.FlagUsagesWrapped(0)+"\n")
+	fmt.Fprint(os.Stderr, rootFlags.FlagUsagesWrapped(0)+"\n")
 }
 
 //Usage of rbd with error message

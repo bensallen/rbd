@@ -34,7 +34,7 @@ var (
 // Usage of the map subcommand
 func Usage() {
 	fmt.Fprintf(os.Stderr, usageHeader)
-	fmt.Fprintf(os.Stderr, flags.FlagUsagesWrapped(0)+"\n")
+	fmt.Fprint(os.Stderr, flags.FlagUsagesWrapped(0)+"\n")
 }
 
 // Run the map subcommand
