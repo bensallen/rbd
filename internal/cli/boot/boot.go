@@ -47,7 +47,7 @@ const (
 // Usage of the boot subcommand
 func Usage() {
 	fmt.Fprintf(os.Stderr, usageHeader)
-	fmt.Fprintf(os.Stderr, flags.FlagUsagesWrapped(0)+"\n")
+	fmt.Fprint(os.Stderr, flags.FlagUsagesWrapped(0)+"\n")
 }
 
 // Run the boot subcommand
