@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: go mod verify
+        run: go mod verify
+      - name: vendor is in sync
+        run: |
+          go mod tidy
+          go mod vendor
+          git diff --exit-code -- go.mod go.sum vendor
+      - name: go vet
+        run: |
+          go vet ./...
+          go vet -tags smoke ./...
+      - name: gofmt
+        run: test -z "$(gofmt -s -l pkg cmd internal test | tee /dev/stderr)"
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Test with coverage
+        run: CGO_ENABLED=0 go test -cover ./...
+      - name: Race detector
+        run: CGO_ENABLED=1 go test -race ./...
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goarch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Build
+        env:
+          CGO_ENABLED: "0"
+          GOOS: linux
+          GOARCH: ${{ matrix.goarch }}
+        run: go build -ldflags '-s' -o rbd-linux-${{ matrix.goarch }} ./cmd/rbd
+
+  smoke:
+    needs: [test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install QEMU and kernel modules
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends qemu-system-x86 cpio
+          modinfo -F filename rbd overlay virtio_net
+          # Ubuntu ships the kernel image root-only; the VM boots the runner's kernel.
+          sudo install -m644 "/boot/vmlinuz-$(uname -r)" "$RUNNER_TEMP/vmlinuz"
+      - name: Smoke test
+        env:
+          CONTAINER_RUNTIME: docker
+          KERNEL: ${{ runner.temp }}/vmlinuz
+        run: ./test/smoke/run.sh

@@ -95,3 +95,12 @@ Subcommands:
   map      Map RBD Image
   unmap    Unmap RBD Image
 ```
+## Testing
+
+Unit tests run with `go test ./...`.
+
+`test/smoke` contains end-to-end tests that map, format, mount, and unmap a real RBD image using `pkg/krbd`, `pkg/mount`, and the `rbd` CLI. `test/smoke/run.sh` starts a Ceph demo container, builds a minimal initramfs, and runs the tests as root inside a QEMU VM booting the host kernel, so no root is needed on the host. It requires podman or docker, `qemu-system-x86_64`, and read access to the kernel image (`/dev/kvm` is used if available).
+
+```
+./test/smoke/run.sh
+```

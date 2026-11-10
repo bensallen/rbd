@@ -33,7 +33,7 @@ func Usage() {
 	//fmt.Fprintf(os.Stderr, flags.FlagUsagesWrapped(0)+"\n")
 }
 
-//Usage of rbd with error message
+// Usage of rbd with error message
 func usageErr(err error) {
 	Usage()
 	fmt.Fprintf(os.Stderr, "Error: %v\n\n", err)

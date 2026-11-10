@@ -92,8 +92,8 @@ func Parse(cmdline string) map[string]*Mount {
 	return mounts
 }
 
-//Split strings on spaces except when a space is within a quoted, bracketed, or braced string.
-//Supports nesting multiple brackets or braces.
+// Split strings on spaces except when a space is within a quoted, bracketed, or braced string.
+// Supports nesting multiple brackets or braces.
 func split(s string) []string {
 	lastRune := map[rune]int{}
 	f := func(c rune) bool {

@@ -289,9 +289,9 @@ func moveRoot(newRoot string) (err error) {
 	return
 }
 
-// note: this is best-effort, and doesn't return errors
-//       this is very much by design, since stopping when we hit errors could leave us in strange states
-//       this function is inspired by the one found in u-root
+// recursiveDelete is best-effort and doesn't return errors. This is by design,
+// since stopping when we hit errors could leave us in strange states. Inspired
+// by the one found in u-root.
 func recursiveDelete(fd int) {
 	// fd always points to a dir
 	// let's use os instead of writing our own Readdirnames
