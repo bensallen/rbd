@@ -53,11 +53,11 @@ func Run(args []string, verbose bool, noop bool) error {
 	}
 
 	wc, err := krbd.RBDBusRemoveWriter()
-	defer wc.Close()
-	w := wc.(io.Writer)
 	if err != nil {
 		return err
 	}
+	defer wc.Close()
+	w := io.Writer(wc)
 
 	if verbose {
 		w = iotest.NewWriteLogger("unmap", w)

@@ -66,11 +66,11 @@ func Run(args []string, verbose bool, noop bool) error {
 	mounts := cmdline.Parse(string(procCmdline))
 
 	wc, err := krbd.RBDBusAddWriter()
-	defer wc.Close()
-	w := wc.(io.Writer)
 	if err != nil {
 		return err
 	}
+	defer wc.Close()
+	w := io.Writer(wc)
 
 	if verbose {
 		w = iotest.NewWriteLogger("Boot:", w)
