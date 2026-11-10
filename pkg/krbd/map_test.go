@@ -81,3 +81,14 @@ func TestImage_Map(t *testing.T) {
 		})
 	}
 }
+
+type shortWriter struct{}
+
+func (shortWriter) Write(p []byte) (int, error) { return len(p) - 1, nil }
+
+func TestImage_MapShortWrite(t *testing.T) {
+	img := Image{Monitors: []string{"10.0.0.1"}, Pool: "rbd", Image: "img", Options: &Options{}}
+	if err := img.Map(shortWriter{}); err == nil {
+		t.Error("expected error on incomplete write")
+	}
+}
