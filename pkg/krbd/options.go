@@ -26,21 +26,27 @@ type Options struct {
 	MountTimeout             int    `krbd:"mount_timeout"`
 	OSDKeepAlive             int    `krbd:"osdkeepalive"`
 	OSDIdleTTL               int    `krbd:"osd_idle_ttl"`
+	OSDRequestTimeout        int    `krbd:"osd_request_timeout"`
+	MsMode                   string `krbd:"ms_mode"`           // legacy, crc, secure, prefer-crc, prefer-secure
+	ReadFromReplica          string `krbd:"read_from_replica"` // no, balance, localize
+	CrushLocation            string `krbd:"crush_location"`
+	RxBounce                 bool   `krbd:"rxbounce"`
 
 	// RBD Block Options
-	Force       bool   `krbd:"force"` // Unmap only
-	ReadWrite   bool   `krbd:"rw"`
-	ReadOnly    bool   `krbd:"ro"`
-	QueueDepth  int    `krbd:"queue_depth"`
-	LockOnRead  bool   `krbd:"lock_on_read"`
-	Exclusive   bool   `krbd:"exclusive"`
-	LockTimeout uint64 `krbd:"lock_timeout"`
-	NoTrim      bool   `krbd:"notrim"`
-	AbortOnFull bool   `krbd:"abort_on_full"`
-	AllocSize   int    `krbd:"alloc_size"`
-	Name        string `krbd:"name"`
-	Secret      string `krbd:"secret"`
-	Namespace   string `krbd:"_pool_ns"`
+	Force           bool   `krbd:"force"` // Unmap only
+	ReadWrite       bool   `krbd:"rw"`
+	ReadOnly        bool   `krbd:"ro"`
+	QueueDepth      int    `krbd:"queue_depth"`
+	LockOnRead      bool   `krbd:"lock_on_read"`
+	Exclusive       bool   `krbd:"exclusive"`
+	LockTimeout     uint64 `krbd:"lock_timeout"`
+	NoTrim          bool   `krbd:"notrim"`
+	AbortOnFull     bool   `krbd:"abort_on_full"`
+	AllocSize       int    `krbd:"alloc_size"`
+	CompressionHint string `krbd:"compression_hint"` // none, compressible, incompressible
+	Name            string `krbd:"name"`
+	Secret          string `krbd:"secret"`
+	Namespace       string `krbd:"_pool_ns"`
 }
 
 // String marshalls Options via the krbd struct tags into comma seperated format

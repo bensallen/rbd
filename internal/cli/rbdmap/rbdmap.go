@@ -29,6 +29,7 @@ var (
 	id        = flags.String("id", "", "Specifies the username (without the 'client.' prefix)")
 	secret    = flags.String("secret", "", "Specifies the user authentication secret")
 	readOnly  = flags.Bool("read-only", false, "Map the image read-only")
+	msMode    = flags.String("ms-mode", "", "Messenger mode: legacy, crc, secure, prefer-crc, or prefer-secure (msgr2 requires crc or secure)")
 )
 
 // Usage of the map subcommand
@@ -52,17 +53,6 @@ func Run(args []string, verbose bool, noop bool) error {
 		os.Exit(2)
 	}
 
-	wc, err := krbd.RBDBusAddWriter()
-	defer wc.Close()
-	w := wc.(io.Writer)
-	if err != nil {
-		return err
-	}
-
-	if verbose {
-		w = iotest.NewWriteLogger("map", w)
-	}
-
 	i := krbd.Image{
 		Monitors: *monAddrs,
 		Pool:     *pool,
@@ -73,14 +63,25 @@ func Run(args []string, verbose bool, noop bool) error {
 			Name:      *id,
 			Secret:    *secret,
 			Namespace: *namespace,
+			MsMode:    *msMode,
 		},
 	}
 
 	if noop {
 		log.Printf("%s", i)
-	} else {
-		return i.Map(w)
+		return nil
 	}
 
-	return nil
+	wc, err := krbd.RBDBusAddWriter()
+	if err != nil {
+		return err
+	}
+	defer wc.Close()
+	w := io.Writer(wc)
+
+	if verbose {
+		w = iotest.NewWriteLogger("map", w)
+	}
+
+	return i.Map(w)
 }
