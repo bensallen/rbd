@@ -8,7 +8,7 @@ import (
 
 // Reference: https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-bus-rbd
 
-const sysBusPath = "/sys/bus/rbd"
+var sysBusPath = "/sys/bus/rbd"
 
 // RBDBusAddWriter returns an io.Writer with the appropriate sysfs rbd/add opened.
 func RBDBusAddWriter() (io.WriteCloser, error) {
