@@ -29,10 +29,10 @@ var (
 // Usage of the unmap subcommand
 func Usage() {
 	fmt.Fprintf(os.Stderr, usageHeader)
-	fmt.Fprintf(os.Stderr, flags.FlagUsagesWrapped(0)+"\n")
+	fmt.Fprint(os.Stderr, flags.FlagUsagesWrapped(0)+"\n")
 }
 
-//Usage of rbd with error message
+// Usage of rbd with error message
 func usageErr(err error) {
 	Usage()
 	fmt.Fprintf(os.Stderr, "Error: %v\n\n", err)
@@ -53,11 +53,11 @@ func Run(args []string, verbose bool, noop bool) error {
 	}
 
 	wc, err := krbd.RBDBusRemoveWriter()
-	defer wc.Close()
-	w := wc.(io.Writer)
 	if err != nil {
 		return err
 	}
+	defer wc.Close()
+	w := io.Writer(wc)
 
 	if verbose {
 		w = iotest.NewWriteLogger("unmap", w)

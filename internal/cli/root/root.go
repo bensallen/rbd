@@ -38,13 +38,13 @@ Subcommands:
 Flags:
 `
 
-//Usage of rbd command printed to stderr
+// Usage of rbd command printed to stderr
 func usage() {
 	fmt.Fprintf(os.Stderr, usageHeader)
-	fmt.Fprintf(os.Stderr, rootFlags.FlagUsagesWrapped(0)+"\n")
+	fmt.Fprint(os.Stderr, rootFlags.FlagUsagesWrapped(0)+"\n")
 }
 
-//Usage of rbd with error message
+// Usage of rbd with error message
 func usageErr(err error) {
 	usage()
 	fmt.Fprintf(os.Stderr, "Error: %v\n\n", err)

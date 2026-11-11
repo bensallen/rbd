@@ -26,33 +26,39 @@ func loopSetup(filename string) (loopDevice string, err error) {
 	return loopDevice, nil
 }
 
+// parseOptions splits mount options into mount(2) flags and a comma separated
+// filesystem data string. loop reports whether the "loop" option was given.
+func parseOptions(options []string) (flags uintptr, data string, loop bool) {
+	var d []string
+	for _, option := range options {
+		if option == "loop" {
+			loop = true
+			continue
+		}
+		if f, ok := opts[option]; ok {
+			flags |= f
+		} else {
+			d = append(d, option)
+		}
+	}
+	return flags, strings.Join(d, ","), loop
+}
+
 // Mount extends u-root/pkg/mount to setup loop devices and parse input options
 // into data and flags
 func Mount(dev string, path string, fsType string, options []string) error {
-	var err error
-	var flags uintptr
-	var data []string
-
 	if fsType == "" {
 		return fmt.Errorf("no file system type provided")
 	}
 
-	for _, option := range options {
-		switch option {
-		case "loop":
-			dev, err = loopSetup(dev)
-			if err != nil {
-				return fmt.Errorf("error setting loop device: %s", err)
-			}
-		default:
-			if f, ok := opts[option]; ok {
-				flags |= f
-			} else {
-				data = append(data, option)
-			}
+	flags, data, loop := parseOptions(options)
+	if loop {
+		var err error
+		if dev, err = loopSetup(dev); err != nil {
+			return fmt.Errorf("error setting loop device: %s", err)
 		}
 	}
 
-	_, err = mount.Mount(dev, path, fsType, strings.Join(data, ","), flags)
+	_, err := mount.Mount(dev, path, fsType, data, flags)
 	return err
 }

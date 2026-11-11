@@ -110,3 +110,19 @@ func TestOptions_String(t *testing.T) {
 		})
 	}
 }
+
+func TestOptions_String_Modern(t *testing.T) {
+	o := Options{
+		Name:              "admin",
+		OSDRequestTimeout: 30,
+		MsMode:            "prefer-crc",
+		ReadFromReplica:   "balance",
+		CrushLocation:     "host:node1",
+		RxBounce:          true,
+		CompressionHint:   "compressible",
+	}
+	want := "osd_request_timeout=30,ms_mode=prefer-crc,read_from_replica=balance,crush_location=host:node1,rxbounce,compression_hint=compressible,name=admin"
+	if got := o.String(); got != want {
+		t.Errorf("Options.String() = %v want %v", got, want)
+	}
+}

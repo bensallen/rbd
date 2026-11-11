@@ -6,7 +6,7 @@ package mount
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -15,7 +15,7 @@ import (
 // It rereads /proc/filesystems each time as the supported file systems can change
 // as modules are added and removed.
 func FindFileSystem(fstype string) error {
-	b, err := ioutil.ReadFile("/proc/filesystems")
+	b, err := os.ReadFile("/proc/filesystems")
 	if err != nil {
 		return err
 	}
@@ -39,8 +39,8 @@ func GetBlockFilesystems() (fstypes []string, err error) {
 
 func internalGetFilesystems(file string) (fstypes []string, err error) {
 	var bytes []byte
-	if bytes, err = ioutil.ReadFile(file); err != nil {
-		return nil, fmt.Errorf("failed to read supported file systems: %v", err)
+	if bytes, err = os.ReadFile(file); err != nil {
+		return nil, fmt.Errorf("failed to read supported file systems: %w", err)
 	}
 	for _, line := range strings.Split(string(bytes), "\n") {
 		// len(fields)==1, 2 possibilites for fs: "nodev" fs and
