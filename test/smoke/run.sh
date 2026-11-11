@@ -8,11 +8,13 @@
 #   CONTAINER_RUNTIME  podman or docker (default: podman if present)
 #   KERNEL             Kernel image to boot (default: /boot/vmlinuz-$(uname -r))
 #   KVER               Module version matching KERNEL (default: $(uname -r))
+#   MODROOT            Root containing lib/modules/$KVER (default: /)
 #   KEEP_CEPH=1        Leave the Ceph container running afterward
 set -euo pipefail
 
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
 KVER=${KVER:-$(uname -r)}
+MODROOT=${MODROOT:-/}
 KERNEL=${KERNEL:-/boot/vmlinuz-$KVER}
 CEPH_IMAGE=${CEPH_IMAGE:-quay.io/ceph/demo:latest-squid}
 CONTAINER=rbd-smoke-ceph
@@ -79,11 +81,18 @@ build_initramfs() {
 	ln -s kmod "$root/sbin/modprobe"
 
 	for m in rbd virtio_net overlay; do
-		modprobe -S "$KVER" --show-depends "$m"
+		modprobe -d "$MODROOT" -S "$KVER" --show-depends "$m"
 	done | awk '$1=="insmod"{print $2}' | sort -u | while read -r ko; do
-		install -D -m644 "$ko" "$root$ko"
+		install -D -m644 "$ko" "$root/lib/modules/$KVER/${ko#*/lib/modules/"$KVER"/}"
 	done
-	cp "/lib/modules/$KVER"/modules.{order,builtin,builtin.modinfo} "$root/lib/modules/$KVER/" 2>/dev/null || true
+	# krb5 (a libceph dependency) self-tests algorithms such as camellia and
+	# cmac that some distros build as modules loaded on demand.
+	for d in kernel/crypto kernel/arch/x86/crypto; do
+		[ -d "$MODROOT/lib/modules/$KVER/$d" ] || continue
+		mkdir -p "$root/lib/modules/$KVER/$d"
+		cp -r "$MODROOT/lib/modules/$KVER/$d/." "$root/lib/modules/$KVER/$d/"
+	done
+	cp "$MODROOT/lib/modules/$KVER"/modules.{order,builtin,builtin.modinfo} "$root/lib/modules/$KVER/" 2>/dev/null || true
 	depmod -b "$root" "$KVER"
 
 	(

@@ -41,11 +41,13 @@ func setup(t *testing.T) env {
 	if e.mon == "" || e.secret == "" {
 		t.Skip("RBD_SMOKE_MON and RBD_SMOKE_SECRET must be set")
 	}
+	// Past this point the environment is meant to be complete, so missing
+	// prerequisites fail rather than skip.
 	if os.Geteuid() != 0 {
-		t.Skip("requires root")
+		t.Fatal("requires root")
 	}
 	if _, err := os.Stat("/sys/bus/rbd"); err != nil {
-		t.Skip("rbd kernel module not loaded")
+		t.Fatal("rbd kernel module not loaded")
 	}
 	return e
 }
@@ -181,7 +183,7 @@ func TestLibrary(t *testing.T) {
 func rbdCLI(t *testing.T, e env, args ...string) string {
 	t.Helper()
 	if e.rbdBin == "" {
-		t.Skip("RBD_SMOKE_BIN not set")
+		t.Fatal("RBD_SMOKE_BIN not set")
 	}
 	out, err := exec.Command(e.rbdBin, args...).CombinedOutput()
 	if err != nil {
