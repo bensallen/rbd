@@ -7,12 +7,19 @@ mount -t devtmpfs devtmpfs /dev
 mount -t tmpfs tmpfs /run
 mount -t tmpfs tmpfs /tmp
 
+# The result also goes to ttyS1, which run.sh reads from a file, so it can't
+# be interleaved with kernel messages on the console.
+finish() {
+	echo "RBD_SMOKE_RESULT=$1"
+	echo "RBD_SMOKE_RESULT=$1" >/dev/ttyS1
+	echo o >/proc/sysrq-trigger
+	sleep 10
+}
+
 fail() {
 	echo "$*"
 	dmesg | grep -iE 'krb5|ceph|rbd|overlay|virtio|module'
-	echo "RBD_SMOKE_RESULT=FAIL"
-	echo o >/proc/sysrq-trigger
-	sleep 10
+	finish FAIL
 }
 
 for m in virtio_net rbd overlay; do
@@ -33,7 +40,5 @@ if [ $rc -ne 0 ]; then
 elif grep -q -- '--- SKIP' /tmp/test.log; then
 	fail "smoke tests skipped"
 else
-	echo "RBD_SMOKE_RESULT=PASS"
-	echo o >/proc/sysrq-trigger
-	sleep 10
+	finish PASS
 fi
