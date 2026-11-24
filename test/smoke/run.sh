@@ -112,11 +112,12 @@ run_vm() {
 	fi
 	log "booting $KERNEL"
 	timeout 600 qemu-system-x86_64 "${accel[@]}" -m 1024 -smp 2 -nographic -no-reboot \
+		-serial mon:stdio -serial file:"$WORK/result" \
 		-kernel "$KERNEL" -initrd "$WORK/initramfs.gz" \
 		-netdev user,id=n0 -device virtio-net-pci,netdev=n0 \
 		-append "console=ttyS0 quiet panic=-1 RBD_SMOKE_MON=$MON_IP RBD_SMOKE_SECRET=$SECRET" \
-		</dev/null | tee "$WORK/console.log"
-	grep -q '^RBD_SMOKE_RESULT=PASS' "$WORK/console.log"
+		</dev/null
+	grep -q '^RBD_SMOKE_RESULT=PASS' "$WORK/result"
 }
 
 start_ceph
